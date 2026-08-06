@@ -1,0 +1,71 @@
+:root {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --border-color: #e2e8f0;
+  --sidebar-bg: #1e293b;
+  --sidebar-text: #f8fafc;
+  --sidebar-hover: #334155;
+  --button-primary: #0d9488;
+  --button-primary-hover: #0f766e;
+  --gold-accent: #d97706;
+  --shadow: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border-color: #334155;
+  --sidebar-bg: #090d16;
+  --sidebar-text: #f8fafc;
+  --sidebar-hover: #1e293b;
+  --button-primary: #14b8a6;
+  --button-primary-hover: #0d9488;
+  --gold-accent: #f59e0b;
+  --shadow: rgba(0, 0, 0, 0.4);
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+h1, h2, h3, .military-font {
+  font-family: 'Rajdhani', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.glass-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 20px var(--shadow);
+}
+
+.military-badge {
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.15), rgba(13, 148, 136, 0.15));
+  border: 1px solid rgba(217, 119, 6, 0.3);
+  color: var(--gold-accent);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--button-primary);
+}
