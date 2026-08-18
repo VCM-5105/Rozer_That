@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { all } = require('../db');
 
-// GLOBAL SEARCH API
+
 router.get('/', async (req, res) => {
   const { q } = req.query;
   if (!q || q.trim() === '') {

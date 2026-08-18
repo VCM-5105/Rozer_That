@@ -3,7 +3,7 @@ const router = express.Router();
 const { run, get, all } = require('../db');
 const { authenticateToken, optionalAuth } = require('../middleware/authMiddleware');
 
-// 1. GET ALL STUDY SHEETS (Public with optional user progress calculation)
+
 router.get('/', optionalAuth, async (req, res) => {
   try {
     const sheets = await all('SELECT * FROM sheets ORDER BY order_index ASC');
@@ -41,7 +41,7 @@ router.get('/', optionalAuth, async (req, res) => {
   }
 });
 
-// 2. GET SINGLE SHEET BY SLUG WITH TOPICS & USER PROGRESS
+
 router.get('/:slug', optionalAuth, async (req, res) => {
   const { slug } = req.params;
   const userId = req.user ? req.user.id : null;
@@ -89,7 +89,7 @@ router.get('/:slug', optionalAuth, async (req, res) => {
   }
 });
 
-// 3. TOGGLE TOPIC COMPLETION (Protected)
+
 router.post('/topics/:topicId/toggle', authenticateToken, async (req, res) => {
   const { topicId } = req.params;
   const userId = req.user.id;
@@ -121,7 +121,7 @@ router.post('/topics/:topicId/toggle', authenticateToken, async (req, res) => {
   }
 });
 
-// 4. SAVE TOPIC PERSONAL NOTE (Protected)
+
 router.post('/topics/:topicId/notes', authenticateToken, async (req, res) => {
   const { topicId } = req.params;
   const { notes } = req.body;
@@ -152,7 +152,6 @@ router.post('/topics/:topicId/notes', authenticateToken, async (req, res) => {
   }
 });
 
-// 5. TOGGLE BOOKMARK (Protected)
 router.post('/topics/:topicId/bookmark', authenticateToken, async (req, res) => {
   const { topicId } = req.params;
   const userId = req.user.id;
@@ -183,7 +182,7 @@ router.post('/topics/:topicId/bookmark', authenticateToken, async (req, res) => 
   }
 });
 
-// 6. INCREMENT REVISION COUNT (Protected)
+
 router.post('/topics/:topicId/revise', authenticateToken, async (req, res) => {
   const { topicId } = req.params;
   const userId = req.user.id;
@@ -214,7 +213,7 @@ router.post('/topics/:topicId/revise', authenticateToken, async (req, res) => {
   }
 });
 
-// 7. GET USER BOOKMARKS (Protected)
+
 router.get('/user/bookmarks', authenticateToken, async (req, res) => {
   try {
     const bookmarks = await all(
@@ -231,7 +230,7 @@ router.get('/user/bookmarks', authenticateToken, async (req, res) => {
   }
 });
 
-// 8. GET USER NOTES (Protected)
+
 router.get('/user/notes', authenticateToken, async (req, res) => {
   try {
     const notes = await all(

@@ -3,7 +3,6 @@ const router = express.Router();
 const { run, get, all } = require('../db');
 const { authenticateToken, requireAdmin } = require('../middleware/authMiddleware');
 
-// 1. GET ALL QUIZZES (Public)
 router.get('/', async (req, res) => {
   try {
     const quizzes = await all('SELECT id, title, subject, exam, duration_minutes FROM quizzes ORDER BY id DESC');
@@ -13,14 +12,13 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 2. GET SINGLE QUIZ DETAILS (Public - returns questions)
 router.get('/:id', async (req, res) => {
   try {
     const quiz = await get('SELECT * FROM quizzes WHERE id = ?', [req.params.id]);
     if (!quiz) return res.status(404).json({ error: 'Quiz not found.' });
 
     const questions = JSON.parse(quiz.questions_json);
-    // Sanitize questions by hiding answerIndex for front-end test execution
+    
     const sanitizedQuestions = questions.map(({ answerIndex, explanation, ...rest }) => rest);
 
     res.json({
@@ -37,7 +35,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// 3. SUBMIT QUIZ ATTEMPT (Protected)
 router.post('/:id/submit', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { userAnswers, timeSpentSeconds } = req.body; // userAnswers: { questionId: selectedIndex }
@@ -68,7 +65,7 @@ router.post('/:id/submit', authenticateToken, async (req, res) => {
 
     const totalQuestions = questions.length;
     const accuracy = Math.round((correctCount / totalQuestions) * 100);
-    const score = correctCount; // 1 point per question for quizzes
+    const score = correctCount; 
 
     const result = await run(
       `INSERT INTO quiz_attempts 
@@ -92,7 +89,6 @@ router.post('/:id/submit', authenticateToken, async (req, res) => {
   }
 });
 
-// 4. GET USER QUIZ HISTORY (Protected)
 router.get('/user/history', authenticateToken, async (req, res) => {
   try {
     const history = await all(
@@ -109,7 +105,6 @@ router.get('/user/history', authenticateToken, async (req, res) => {
   }
 });
 
-// 5. CREATE QUIZ (Admin Only)
 router.post('/', authenticateToken, requireAdmin, async (req, res) => {
   const { title, subject, exam, duration_minutes, questions } = req.body;
 

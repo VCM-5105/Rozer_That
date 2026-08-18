@@ -15,7 +15,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// 1. GET ALL PYQs (Public, with optional filtering by exam & year)
 router.get('/', async (req, res) => {
   try {
     const { exam, year } = req.query;
@@ -39,7 +38,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 2. CREATE PYQ (Admin Only)
 router.post('/', authenticateToken, requireAdmin, upload.single('file'), async (req, res) => {
   const { title, exam, year, paper_type } = req.body;
   const file_url = req.file ? `/uploads/${req.file.filename}` : req.body.file_url || '';
@@ -59,7 +57,6 @@ router.post('/', authenticateToken, requireAdmin, upload.single('file'), async (
   }
 });
 
-// 3. INCREMENT DOWNLOAD COUNT
 router.post('/:id/download', async (req, res) => {
   try {
     await run('UPDATE pyqs SET download_count = download_count + 1 WHERE id = ?', [req.params.id]);
@@ -69,7 +66,6 @@ router.post('/:id/download', async (req, res) => {
   }
 });
 
-// 4. DELETE PYQ (Admin Only)
 router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
     await run('DELETE FROM pyqs WHERE id = ?', [req.params.id]);

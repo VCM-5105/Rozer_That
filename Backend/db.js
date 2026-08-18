@@ -3,13 +3,13 @@ const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcryptjs');
 
-// Ensure data folder exists
+
 const dataDir = path.join(__dirname, 'data');
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
-// Ensure uploads folder exists
+
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
@@ -18,13 +18,12 @@ if (!fs.existsSync(uploadsDir)) {
 const dbPath = path.join(dataDir, 'database.sqlite');
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
-    console.error('❌ SQLite connection error:', err.message);
+    console.error('SQLite connection error:', err.message);
   } else {
-    console.log('✅ Connected to SQLite database at:', dbPath);
+    console.log('Connected to SQLite database at:', dbPath);
   }
 });
 
-// Promisified query helper functions
 const run = (sql, params = []) => {
   return new Promise((resolve, reject) => {
     db.run(sql, params, function (err) {
@@ -52,10 +51,10 @@ const all = (sql, params = []) => {
   });
 };
 
-// Initialize database schema and default seed data
+
 const initDB = async () => {
   try {
-    // 1. Users Table
+   
     await run(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -67,7 +66,7 @@ const initDB = async () => {
       )
     `);
 
-    // 2. Study Sheets Table
+   
     await run(`
       CREATE TABLE IF NOT EXISTS sheets (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -80,7 +79,7 @@ const initDB = async () => {
       )
     `);
 
-    // 3. Topics Table
+   
     await run(`
       CREATE TABLE IF NOT EXISTS topics (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -95,7 +94,7 @@ const initDB = async () => {
       )
     `);
 
-    // 4. User Topic Progress
+    
     await run(`
       CREATE TABLE IF NOT EXISTS user_topic_progress (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -110,7 +109,7 @@ const initDB = async () => {
       )
     `);
 
-    // 5. Defence Notifications Table
+    
     await run(`
       CREATE TABLE IF NOT EXISTS notifications (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -126,7 +125,7 @@ const initDB = async () => {
       )
     `);
 
-    // 6. PYQs Table
+    
     await run(`
       CREATE TABLE IF NOT EXISTS pyqs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -139,7 +138,7 @@ const initDB = async () => {
       )
     `);
 
-    // 7. Daily Current Affairs Table
+   
     await run(`
       CREATE TABLE IF NOT EXISTS current_affairs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -152,7 +151,7 @@ const initDB = async () => {
       )
     `);
 
-    // 8. Motivational Quotes Table
+    
     await run(`
       CREATE TABLE IF NOT EXISTS quotes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -161,7 +160,6 @@ const initDB = async () => {
       )
     `);
 
-    // 9. Quizzes Table
     await run(`
       CREATE TABLE IF NOT EXISTS quizzes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -173,7 +171,7 @@ const initDB = async () => {
       )
     `);
 
-    // 10. Quiz Attempts Table
+    
     await run(`
       CREATE TABLE IF NOT EXISTS quiz_attempts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -188,7 +186,7 @@ const initDB = async () => {
       )
     `);
 
-    // 11. Mock Tests Table
+    
     await run(`
       CREATE TABLE IF NOT EXISTS mock_tests (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -202,7 +200,7 @@ const initDB = async () => {
       )
     `);
 
-    // 12. Mock Attempts Table
+   
     await run(`
       CREATE TABLE IF NOT EXISTS mock_attempts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -219,9 +217,7 @@ const initDB = async () => {
       )
     `);
 
-    console.log('✅ SQLite Tables Initialized');
-
-    // Seed default admin and initial data if empty
+    console.log('SQLite Tables Initialized');
     await seedInitialData();
 
   } catch (err) {
@@ -230,7 +226,7 @@ const initDB = async () => {
 };
 
 const seedInitialData = async () => {
-  // Check Admin User
+  
   const admin = await get('SELECT * FROM users WHERE email = ?', ['admin@rozerthat.com']);
   if (!admin) {
     const hash = await bcrypt.hash('Admin@123', 10);
@@ -239,7 +235,7 @@ const seedInitialData = async () => {
       ['CommanderAdmin', 'admin@rozerthat.com', hash, 'admin']
     );
 
-    // Create demo student account
+   
     const studentHash = await bcrypt.hash('Student@123', 10);
     await run(
       'INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)',
@@ -248,7 +244,7 @@ const seedInitialData = async () => {
     console.log('✅ Default users seeded (Admin: admin@rozerthat.com / Admin@123)');
   }
 
-  // Seed Study Sheets
+ 
   const sheetCount = await get('SELECT COUNT(*) as count FROM sheets');
   if (sheetCount.count === 0) {
     const sheetsData = [
@@ -352,7 +348,7 @@ const seedInitialData = async () => {
         );
       }
     }
-    console.log('✅ Study Sheets seeded');
+    console.log('Study Sheets seeded');
   }
 
   // Seed Notifications
@@ -400,7 +396,7 @@ const seedInitialData = async () => {
     console.log('✅ Defence Notifications seeded');
   }
 
-  // Seed PYQs
+
   const pyqCount = await get('SELECT COUNT(*) as count FROM pyqs');
   if (pyqCount.count === 0) {
     const pyqList = [
@@ -420,7 +416,7 @@ const seedInitialData = async () => {
     console.log('✅ PYQs seeded');
   }
 
-  // Seed Current Affairs
+  
   const newsCount = await get('SELECT COUNT(*) as count FROM current_affairs');
   if (newsCount.count === 0) {
     const newsList = [
@@ -456,7 +452,8 @@ const seedInitialData = async () => {
     console.log('✅ Current Affairs seeded');
   }
 
-  // Seed Quotes
+ 
+  
   const quoteCount = await get('SELECT COUNT(*) as count FROM quotes');
   if (quoteCount.count === 0) {
     const quotes = [
@@ -472,7 +469,6 @@ const seedInitialData = async () => {
     console.log('✅ Quotes seeded');
   }
 
-  // Seed Quizzes
   const quizCount = await get('SELECT COUNT(*) as count FROM quizzes');
   if (quizCount.count === 0) {
     const sampleQuiz = {
@@ -526,7 +522,7 @@ const seedInitialData = async () => {
     console.log('✅ Quizzes seeded');
   }
 
-  // Seed Mock Tests
+
   const mockCount = await get('SELECT COUNT(*) as count FROM mock_tests');
   if (mockCount.count === 0) {
     const sampleMock = {
@@ -576,7 +572,7 @@ const seedInitialData = async () => {
       'INSERT INTO mock_tests (title, exam, duration_minutes, total_marks, positive_marks, negative_marks, questions_json) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [sampleMock.title, sampleMock.exam, sampleMock.duration_minutes, sampleMock.total_marks, sampleMock.positive_marks, sampleMock.negative_marks, sampleMock.questions_json]
     );
-    console.log('✅ Mock Tests seeded');
+    console.log('Mock Tests seeded');
   }
 };
 

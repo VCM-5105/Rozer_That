@@ -5,7 +5,6 @@ const path = require('path');
 const { run, get, all } = require('../db');
 const { authenticateToken, requireAdmin } = require('../middleware/authMiddleware');
 
-// Multer Storage Configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, path.join(__dirname, '../uploads'));
@@ -17,7 +16,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// 1. GET ALL NOTIFICATIONS (Public)
 router.get('/', async (req, res) => {
   try {
     const { exam } = req.query;
@@ -36,7 +34,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 2. CREATE NOTIFICATION (Admin Only)
 router.post('/', authenticateToken, requireAdmin, upload.single('pdf'), async (req, res) => {
   const { title, exam, eligibility, age_limit, apply_start, apply_end, official_link } = req.body;
   const pdf_url = req.file ? `/uploads/${req.file.filename}` : req.body.pdf_url || '';
@@ -57,7 +54,6 @@ router.post('/', authenticateToken, requireAdmin, upload.single('pdf'), async (r
   }
 });
 
-// 3. DELETE NOTIFICATION (Admin Only)
 router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
     await run('DELETE FROM notifications WHERE id = ?', [req.params.id]);

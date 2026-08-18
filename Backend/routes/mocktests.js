@@ -3,7 +3,7 @@ const router = express.Router();
 const { run, get, all } = require('../db');
 const { authenticateToken, requireAdmin } = require('../middleware/authMiddleware');
 
-// 1. GET ALL MOCK TESTS (Public)
+
 router.get('/', async (req, res) => {
   try {
     const mocks = await all(
@@ -15,7 +15,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 2. GET SINGLE MOCK TEST BY ID (Public)
 router.get('/:id', async (req, res) => {
   try {
     const mock = await get('SELECT * FROM mock_tests WHERE id = ?', [req.params.id]);
@@ -40,7 +39,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// 3. SUBMIT MOCK TEST (Protected)
 router.post('/:id/submit', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { userAnswers, timeSpentSeconds } = req.body; // userAnswers: { questionId: selectedIndex }
@@ -120,7 +118,6 @@ router.post('/:id/submit', authenticateToken, async (req, res) => {
   }
 });
 
-// 4. GET USER MOCK HISTORY (Protected)
 router.get('/user/history', authenticateToken, async (req, res) => {
   try {
     const history = await all(
@@ -137,7 +134,6 @@ router.get('/user/history', authenticateToken, async (req, res) => {
   }
 });
 
-// 5. CREATE MOCK TEST (Admin Only)
 router.post('/', authenticateToken, requireAdmin, async (req, res) => {
   const { title, exam, duration_minutes, total_marks, positive_marks, negative_marks, questions } = req.body;
 

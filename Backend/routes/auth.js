@@ -6,7 +6,6 @@ const { run, get, all } = require('../db');
 const { authenticateToken, JWT_SECRET } = require('../middleware/authMiddleware');
 const nodemailer = require('nodemailer');
 
-// 1. REGISTER USER
 router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
 
@@ -40,7 +39,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// 2. LOGIN USER
+
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -73,13 +72,13 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// 3. GET CURRENT USER PROFILE & ANALYTICS
+
 router.get('/me', authenticateToken, async (req, res) => {
   try {
     const user = await get('SELECT id, username, email, role, created_at FROM users WHERE id = ?', [req.user.id]);
     if (!user) return res.status(404).json({ error: 'User not found.' });
 
-    // Progress Stats
+
     const totalTopics = await get('SELECT COUNT(*) as count FROM topics');
     const completedTopics = await get('SELECT COUNT(*) as count FROM user_topic_progress WHERE user_id = ? AND is_completed = 1', [req.user.id]);
     const totalQuizzes = await get('SELECT COUNT(*) as count FROM quiz_attempts WHERE user_id = ?', [req.user.id]);
@@ -95,7 +94,7 @@ router.get('/me', authenticateToken, async (req, res) => {
         quizzesTaken: totalQuizzes.count || 0,
         mocksTaken: totalMocks.count || 0,
         bookmarkedTopics: bookmarks.count || 0,
-        streakDays: 5 // Default active cadet streak
+        streakDays: 5 
       }
     });
   } catch (err) {
@@ -104,7 +103,7 @@ router.get('/me', authenticateToken, async (req, res) => {
   }
 });
 
-// 4. FORGOT PASSWORD (STUB / EMAIL RESET DEMO)
+
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: 'Email is required.' });
@@ -115,12 +114,12 @@ router.post('/forgot-password', async (req, res) => {
       return res.status(404).json({ error: 'No account found with this email address.' });
     }
 
-    // Generate reset token
+  
     const resetToken = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '1h' });
 
     res.json({
       message: 'Password reset instructions have been generated.',
-      resetToken // Returned for easy UI testing/simulation
+      resetToken 
     });
   } catch (err) {
     res.status(500).json({ error: 'Server error processing request.' });

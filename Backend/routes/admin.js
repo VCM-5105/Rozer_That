@@ -3,10 +3,10 @@ const router = express.Router();
 const { run, get, all } = require('../db');
 const { authenticateToken, requireAdmin } = require('../middleware/authMiddleware');
 
-// Protect all admin routes
+
 router.use(authenticateToken, requireAdmin);
 
-// 1. GET ADMIN OVERVIEW STATS
+
 router.get('/stats', async (req, res) => {
   try {
     const usersCount = await get('SELECT COUNT(*) as count FROM users');
@@ -33,7 +33,7 @@ router.get('/stats', async (req, res) => {
   }
 });
 
-// 2. GET ALL USERS LIST
+
 router.get('/users', async (req, res) => {
   try {
     const users = await all('SELECT id, username, email, role, created_at FROM users ORDER BY created_at DESC');
@@ -43,7 +43,7 @@ router.get('/users', async (req, res) => {
   }
 });
 
-// 3. UPDATE USER ROLE
+
 router.put('/users/:id/role', async (req, res) => {
   const { role } = req.body;
   if (!['student', 'admin'].includes(role)) {
@@ -57,7 +57,7 @@ router.put('/users/:id/role', async (req, res) => {
   }
 });
 
-// 4. DELETE USER
+
 router.delete('/users/:id', async (req, res) => {
   try {
     await run('DELETE FROM users WHERE id = ?', [req.params.id]);

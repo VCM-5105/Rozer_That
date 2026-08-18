@@ -3,7 +3,6 @@ const router = express.Router();
 const { run, get, all } = require('../db');
 const { authenticateToken, requireAdmin } = require('../middleware/authMiddleware');
 
-// 1. GET CURRENT AFFAIRS (Public, filterable by category)
 router.get('/', async (req, res) => {
   try {
     const { category } = req.query;
@@ -23,7 +22,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 2. CREATE CURRENT AFFAIRS ARTICLE (Admin Only)
 router.post('/', authenticateToken, requireAdmin, async (req, res) => {
   const { title, category, content, date, image_url } = req.body;
 
@@ -44,7 +42,7 @@ router.post('/', authenticateToken, requireAdmin, async (req, res) => {
   }
 });
 
-// 3. DELETE CURRENT AFFAIRS ARTICLE (Admin Only)
+
 router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
     await run('DELETE FROM current_affairs WHERE id = ?', [req.params.id]);

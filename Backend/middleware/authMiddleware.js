@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'rozer_that_secret_key_2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'rozer_that_secret_key';
 
-// Required Authentication Middleware
+
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -20,7 +20,6 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// Optional Authentication Middleware (Attaches user if logged in, but doesn't block guests)
 const optionalAuth = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -40,7 +39,6 @@ const optionalAuth = (req, res, next) => {
   });
 };
 
-// Admin Only Guard
 const requireAdmin = (req, res, next) => {
   if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Admin permissions required.' });
