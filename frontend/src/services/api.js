@@ -7,7 +7,7 @@ const API = axios.create({
   },
 });
 
-// Interceptor to attach JWT token to every request
+
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem('rozer_token');
   if (token) {

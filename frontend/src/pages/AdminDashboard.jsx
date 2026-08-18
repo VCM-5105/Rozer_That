@@ -136,7 +136,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Admin Tabs */}
+      
       <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-[var(--border-color)]">
         {[
           { key: 'overview', label: 'Enlisted Users' },

@@ -24,7 +24,7 @@ import Quizzes from './pages/Quizzes';
 import MockTests from './pages/MockTests';
 import AdminDashboard from './pages/AdminDashboard';
 
-// Protected Route Guard
+
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
   if (loading) return <div className="py-16 text-center">Verifying Cadet Identity...</div>;
@@ -32,7 +32,7 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-// Admin Route Guard
+
 const AdminRoute = ({ children }) => {
   const { isAdmin, loading } = useAuth();
   if (loading) return <div className="py-16 text-center">Verifying Admin Privileges...</div>;

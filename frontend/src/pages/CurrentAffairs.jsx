@@ -36,7 +36,7 @@ const CurrentAffairs = () => {
         </p>
       </div>
 
-      {/* Category Pills */}
+     
       <div className="flex items-center gap-2 overflow-x-auto pb-1 p-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)]">
         {categories.map((cat) => (
           <button
@@ -53,7 +53,7 @@ const CurrentAffairs = () => {
         ))}
       </div>
 
-      {/* News List */}
+     
       {loading ? (
         <div className="py-16 text-center text-[var(--text-secondary)]">Loading Current Affairs Digest...</div>
       ) : news.length === 0 ? (

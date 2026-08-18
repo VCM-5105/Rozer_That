@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Search, ChevronDown, User, LogOut, Shield, Menu, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
+import chestnumber from '../../assets/logo.png';
 
 const Navbar = ({ onOpenSearch }) => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -15,20 +16,18 @@ const Navbar = ({ onOpenSearch }) => {
     <header className="sticky top-0 z-40 w-full bg-[var(--bg-secondary)] border-b border-[var(--border-color)] shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         
-        {/* Left Side: Brand Logo & Navigation Links */}
+       
         <div className="flex items-center gap-8">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-teal-600 to-amber-500 flex items-center justify-center text-white font-black text-lg shadow-md">
-              R
-            </div>
+            <img src={chestnumber} alt="RozerThat" className="w-10 h-10 object-contain" />
             <span className="text-2xl font-extrabold tracking-wider military-font text-[var(--text-primary)]">
               RozerThat
             </span>
           </Link>
 
-          {/* Desktop Nav Items */}
+         
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-            {/* Exam Dropdown */}
+            
             <div className="relative" onMouseEnter={() => setDropdownOpen(true)} onMouseLeave={() => setDropdownOpen(false)}>
               <button className="flex items-center gap-1 py-2 text-[var(--text-primary)] hover:text-teal-500 transition">
                 Exams <ChevronDown className="w-4 h-4" />
