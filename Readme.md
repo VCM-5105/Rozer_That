@@ -8,13 +8,11 @@ The platform provides structured study resources, previous year question papers,
 
 ---
 
-## 🚀 Live Demo
+## Live Demo
 
 **Frontend:** https://rozer-that.vercel.app/
 
 **Backend API:** https://rozer-that.onrender.com/
-
-**Health Check:** https://rozer-that.onrender.com/api/health
 
 ---
 
