@@ -59,7 +59,7 @@ const Navbar = ({ onOpenSearch }) => {
           >
             <Search className="w-4 h-4 text-teal-500" />
             <span className="hidden sm:inline">Search Arsenal...</span>
-            <kbd className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-[var(--bg-card)] border border-[var(--border-color)] text-[10px] font-mono">⌘K</kbd>
+            
           </button>
 
           {/* Theme Toggle */}
