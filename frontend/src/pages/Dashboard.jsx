@@ -28,10 +28,15 @@ const Dashboard = () => {
         API.get('/mocktests/user/history')
       ]);
 
-      setBookmarks(bmRes.data);
-      setUserNotes(notesRes.data);
-      setQuizHistory(quizRes.data);
-      setMockHistory(mockRes.data);
+      const bmData = bmRes.data?.data || bmRes.data;
+      const notesData = notesRes.data?.data || notesRes.data;
+      const quizData = quizRes.data?.data || quizRes.data;
+      const mockData = mockRes.data?.data || mockRes.data;
+
+      setBookmarks(Array.isArray(bmData) ? bmData : []);
+      setUserNotes(Array.isArray(notesData) ? notesData : []);
+      setQuizHistory(Array.isArray(quizData) ? quizData : []);
+      setMockHistory(Array.isArray(mockData) ? mockData : []);
     } catch (err) {
       console.error('Dashboard data load error:', err);
     } finally {

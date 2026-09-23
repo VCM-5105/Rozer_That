@@ -16,7 +16,8 @@ const MockTests = () => {
     try {
       setLoading(true);
       const res = await API.get('/mocktests');
-      setMocks(res.data);
+      const payload = res.data?.data || res.data;
+      setMocks(Array.isArray(payload) ? payload : []);
     } catch (err) {
       console.error('Fetch mock tests error:', err);
     } finally {

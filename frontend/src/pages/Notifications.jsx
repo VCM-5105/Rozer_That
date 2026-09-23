@@ -15,7 +15,8 @@ const Notifications = () => {
     try {
       setLoading(true);
       const res = await API.get(`/notifications?exam=${examFilter}`);
-      setNotifications(res.data);
+      const payload = res.data?.data || res.data;
+      setNotifications(Array.isArray(payload) ? payload : []);
     } catch (err) {
       console.error('Fetch notifications error:', err);
     } finally {

@@ -18,7 +18,8 @@ const Sheets = () => {
     try {
       setLoading(true);
       const res = await API.get('/sheets');
-      setSheets(res.data);
+      const payload = res.data?.data || res.data;
+      setSheets(Array.isArray(payload) ? payload : []);
     } catch (err) {
       console.error('Fetch sheets error:', err);
     } finally {
@@ -26,7 +27,7 @@ const Sheets = () => {
     }
   };
 
-  const filteredSheets = sheets.filter((s) => {
+  const filteredSheets = (Array.isArray(sheets) ? sheets : []).filter((s) => {
     const matchesExam = examFilter === 'All' || s.category === examFilter;
     const matchesSearch = s.title.toLowerCase().includes(search.toLowerCase()) ||
                           s.description.toLowerCase().includes(search.toLowerCase());

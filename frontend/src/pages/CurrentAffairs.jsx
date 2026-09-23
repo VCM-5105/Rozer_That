@@ -15,7 +15,8 @@ const CurrentAffairs = () => {
     try {
       setLoading(true);
       const res = await API.get(`/news?category=${category}`);
-      setNews(res.data);
+      const payload = res.data?.data || res.data;
+      setNews(Array.isArray(payload) ? payload : []);
     } catch (err) {
       console.error('Fetch news error:', err);
     } finally {

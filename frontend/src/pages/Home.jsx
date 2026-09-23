@@ -18,8 +18,10 @@ const Home = ({ onOpenSearch }) => {
         API.get('/quotes/daily'),
         API.get('/sheets')
       ]);
-      setDailyQuote(quoteRes.data);
-      setSheets(sheetsRes.data);
+      const quotePayload = quoteRes.data?.data || quoteRes.data;
+      const sheetsPayload = sheetsRes.data?.data || sheetsRes.data;
+      setDailyQuote(quotePayload);
+      setSheets(Array.isArray(sheetsPayload) ? sheetsPayload : []);
     } catch (err) {
       console.error('Home data load error:', err);
     }
@@ -135,7 +137,7 @@ const Home = ({ onOpenSearch }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {sheets.slice(0, 6).map((sheet) => (
+          {(Array.isArray(sheets) ? sheets : []).slice(0, 6).map((sheet) => (
             <div key={sheet.id} className="p-6 rounded-2xl glass-card flex flex-col justify-between space-y-4">
               <div>
                 <div className="flex justify-between items-start mb-3">

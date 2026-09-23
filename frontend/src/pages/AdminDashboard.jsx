@@ -27,8 +27,10 @@ const AdminDashboard = () => {
         API.get('/admin/stats'),
         API.get('/admin/users')
       ]);
-      setStats(statsRes.data);
-      setUsers(usersRes.data);
+      const statsPayload = statsRes.data?.data || statsRes.data;
+      const usersPayload = usersRes.data?.data || usersRes.data;
+      setStats(statsPayload);
+      setUsers(Array.isArray(usersPayload) ? usersPayload : []);
     } catch (err) {
       console.error('Admin data fetch error:', err);
     } finally {

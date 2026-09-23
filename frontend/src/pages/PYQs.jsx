@@ -16,7 +16,8 @@ const PYQs = () => {
     try {
       setLoading(true);
       const res = await API.get(`/pyqs?exam=${examFilter}&year=${yearFilter}`);
-      setPyqs(res.data);
+      const payload = res.data?.data || res.data;
+      setPyqs(Array.isArray(payload) ? payload : []);
     } catch (err) {
       console.error('Fetch PYQs error:', err);
     } finally {

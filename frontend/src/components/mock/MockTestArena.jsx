@@ -40,8 +40,11 @@ const MockTestArena = ({ mockId, onBack }) => {
     try {
       setLoading(true);
       const res = await API.get(`/mocktests/${mockId}`);
-      setMock(res.data);
-      setTimeRemaining(res.data.duration_minutes * 60);
+      const payload = res.data?.data || res.data;
+      setMock(payload);
+      if (payload?.duration_minutes) {
+        setTimeRemaining(payload.duration_minutes * 60);
+      }
     } catch (err) {
       console.error('Mock test fetch error:', err);
     } finally {
@@ -66,7 +69,8 @@ const MockTestArena = ({ mockId, onBack }) => {
           userAnswers,
           timeSpentSeconds: Math.max(1, timeSpent)
         });
-        setResults(res.data);
+        const payload = res.data?.data || res.data;
+        setResults(payload);
         setSubmitted(true);
       } catch (err) {
         console.error('Mock evaluation error:', err);

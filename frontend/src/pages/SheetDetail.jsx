@@ -21,7 +21,8 @@ const SheetDetail = () => {
     try {
       setLoading(true);
       const res = await API.get(`/sheets/${slug}`);
-      setData(res.data);
+      const payload = res.data?.data || res.data;
+      setData(payload);
     } catch (err) {
       console.error('Fetch sheet detail error:', err);
     } finally {
@@ -76,7 +77,8 @@ const SheetDetail = () => {
 
   if (!data) return <div className="py-16 text-center text-red-500">Study Sheet not found.</div>;
 
-  const { sheet, topics, completedTopics, totalTopics, percentage } = data;
+  const { sheet = {}, topics = [], completedTopics = 0, totalTopics = 0, percentage = 0 } = data || {};
+  const topicList = Array.isArray(topics) ? topics : [];
 
   return (
     <div className="space-y-8">
@@ -89,10 +91,10 @@ const SheetDetail = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <span className="px-3 py-1 rounded-lg bg-teal-500/10 text-teal-500 text-xs font-bold military-font uppercase">
-              {sheet.category} Arsenal
+              {sheet?.category || 'Defence'} Arsenal
             </span>
-            <h1 className="text-3xl font-extrabold text-[var(--text-primary)] military-font mt-2">{sheet.title}</h1>
-            <p className="text-xs text-[var(--text-secondary)] mt-1">{sheet.description}</p>
+            <h1 className="text-3xl font-extrabold text-[var(--text-primary)] military-font mt-2">{sheet?.title}</h1>
+            <p className="text-xs text-[var(--text-secondary)] mt-1">{sheet?.description}</p>
           </div>
 
           <div className="w-full md:w-64 space-y-1.5 p-4 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border-color)]">
@@ -111,11 +113,11 @@ const SheetDetail = () => {
       {/* Topics List Table View */}
       <div className="p-6 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-xl space-y-4">
         <h2 className="font-bold text-xl text-[var(--text-primary)] military-font uppercase border-b border-[var(--border-color)] pb-3">
-          Topic Execution Checklist ({topics.length} Topics)
+          Topic Execution Checklist ({topicList.length} Topics)
         </h2>
 
         <div className="space-y-3">
-          {topics.map((topic, index) => (
+          {topicList.map((topic, index) => (
             <div
               key={topic.id}
               className={`p-4 rounded-2xl border transition flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${

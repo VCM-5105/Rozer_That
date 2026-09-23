@@ -20,7 +20,8 @@ const SearchModal = ({ isOpen, onClose }) => {
       try {
         setLoading(true);
         const res = await API.get(`/search?q=${encodeURIComponent(query)}`);
-        setResults(res.data);
+        const payload = res.data?.data || res.data;
+        setResults(payload);
       } catch (err) {
         console.error('Search query error:', err);
       } finally {

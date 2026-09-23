@@ -16,7 +16,8 @@ const Quizzes = () => {
     try {
       setLoading(true);
       const res = await API.get('/quizzes');
-      setQuizzes(res.data);
+      const payload = res.data?.data || res.data;
+      setQuizzes(Array.isArray(payload) ? payload : []);
     } catch (err) {
       console.error('Fetch quizzes error:', err);
     } finally {

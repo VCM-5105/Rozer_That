@@ -39,8 +39,11 @@ const QuizPlayer = ({ quizId, onBack }) => {
     try {
       setLoading(true);
       const res = await API.get(`/quizzes/${quizId}`);
-      setQuiz(res.data);
-      setTimeRemaining(res.data.duration_minutes * 60);
+      const payload = res.data?.data || res.data;
+      setQuiz(payload);
+      if (payload?.duration_minutes) {
+        setTimeRemaining(payload.duration_minutes * 60);
+      }
     } catch (err) {
       console.error('Quiz fetch error:', err);
     } finally {
@@ -64,7 +67,8 @@ const QuizPlayer = ({ quizId, onBack }) => {
           userAnswers,
           timeSpentSeconds: Math.max(1, timeSpent)
         });
-        setResults(res.data);
+        const payload = res.data?.data || res.data;
+        setResults(payload);
         setSubmitted(true);
       } catch (err) {
         console.error('Quiz evaluation error:', err);
