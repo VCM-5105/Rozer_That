@@ -21,8 +21,9 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       const res = await API.get('/auth/me');
-      setUser(res.data.data.user);
-      setStats(res.data.data.stats);
+      const payload = res.data?.data || res.data;
+      setUser(payload.user);
+      setStats(payload.stats);
     } catch (err) {
       console.error('Auth verify error:', err);
       logout();
@@ -33,15 +34,18 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const res = await API.post('/auth/login', { email, password });
-    const { accessToken, refreshToken, user: userData } = res.data.data;
+    const payload = res.data?.data || res.data;
+    const { accessToken, refreshToken, user: userData } = payload;
     
-    localStorage.setItem('rozer_access_token', accessToken);
-    localStorage.setItem('rozer_token', accessToken);
+    if (accessToken) {
+      localStorage.setItem('rozer_access_token', accessToken);
+      localStorage.setItem('rozer_token', accessToken);
+    }
     if (refreshToken) {
       localStorage.setItem('rozer_refresh_token', refreshToken);
     }
 
-    setToken(accessToken);
+    setToken(accessToken || 'authenticated');
     setUser(userData);
     await fetchProfile();
     return res.data;
@@ -49,15 +53,18 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (username, email, password) => {
     const res = await API.post('/auth/register', { username, email, password });
-    const { accessToken, refreshToken, user: userData } = res.data.data;
+    const payload = res.data?.data || res.data;
+    const { accessToken, refreshToken, user: userData } = payload;
     
-    localStorage.setItem('rozer_access_token', accessToken);
-    localStorage.setItem('rozer_token', accessToken);
+    if (accessToken) {
+      localStorage.setItem('rozer_access_token', accessToken);
+      localStorage.setItem('rozer_token', accessToken);
+    }
     if (refreshToken) {
       localStorage.setItem('rozer_refresh_token', refreshToken);
     }
 
-    setToken(accessToken);
+    setToken(accessToken || 'authenticated');
     setUser(userData);
     await fetchProfile();
     return res.data;

@@ -21,7 +21,9 @@ const Register = () => {
       await register(username, email, password);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || 'Registration failed. Try a different username or email.');
+      console.error('Registration Error Payload:', err.response);
+      const serverMsg = err.response?.data?.message || err.response?.data?.error;
+      setError(serverMsg || 'Registration failed. Check network or database connection.');
     } finally {
       setLoading(false);
     }

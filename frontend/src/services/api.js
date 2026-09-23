@@ -25,19 +25,27 @@ API.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // If 401 Unauthorized and not already retried
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Check if the failed request is login or register
+    const isAuthRequest = originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/register');
+
+    // If 401 Unauthorized, not already retried, and NOT an auth request (login/register)
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRequest) {
       originalRequest._retry = true;
       try {
         const storedRefreshToken = localStorage.getItem('rozer_refresh_token');
+        if (!storedRefreshToken) {
+          return Promise.reject(error);
+        }
+
         const res = await axios.post(
           `${import.meta.env.VITE_API_BASE_URL || '/api'}/auth/refresh-token`,
           { refreshToken: storedRefreshToken },
           { withCredentials: true }
         );
 
-        const newAccessToken = res.data.data.accessToken;
-        const newRefreshToken = res.data.data.refreshToken;
+        const payload = res.data?.data || res.data;
+        const newAccessToken = payload?.accessToken;
+        const newRefreshToken = payload?.refreshToken;
 
         if (newAccessToken) {
           localStorage.setItem('rozer_access_token', newAccessToken);

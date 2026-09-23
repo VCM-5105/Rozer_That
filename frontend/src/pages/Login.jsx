@@ -20,7 +20,9 @@ const Login = () => {
       await login(email, password);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to login. Please check your credentials.');
+      console.error('Login Error Payload:', err.response);
+      const serverMsg = err.response?.data?.message || err.response?.data?.error;
+      setError(serverMsg || 'Failed to login. Please check your credentials.');
     } finally {
       setLoading(false);
     }
