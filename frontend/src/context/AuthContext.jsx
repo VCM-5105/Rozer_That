@@ -6,7 +6,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [stats, setStats] = useState(null);
-  const [token, setToken] = useState(() => localStorage.getItem('rozer_token'));
+  const [token, setToken] = useState(() => localStorage.getItem('rozer_access_token') || localStorage.getItem('rozer_token'));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,8 +21,8 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       const res = await API.get('/auth/me');
-      setUser(res.data.user);
-      setStats(res.data.stats);
+      setUser(res.data.data.user);
+      setStats(res.data.data.stats);
     } catch (err) {
       console.error('Auth verify error:', err);
       logout();
@@ -33,9 +33,15 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const res = await API.post('/auth/login', { email, password });
-    const { token: authToken, user: userData } = res.data;
-    localStorage.setItem('rozer_token', authToken);
-    setToken(authToken);
+    const { accessToken, refreshToken, user: userData } = res.data.data;
+    
+    localStorage.setItem('rozer_access_token', accessToken);
+    localStorage.setItem('rozer_token', accessToken);
+    if (refreshToken) {
+      localStorage.setItem('rozer_refresh_token', refreshToken);
+    }
+
+    setToken(accessToken);
     setUser(userData);
     await fetchProfile();
     return res.data;
@@ -43,19 +49,33 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (username, email, password) => {
     const res = await API.post('/auth/register', { username, email, password });
-    const { token: authToken, user: userData } = res.data;
-    localStorage.setItem('rozer_token', authToken);
-    setToken(authToken);
+    const { accessToken, refreshToken, user: userData } = res.data.data;
+    
+    localStorage.setItem('rozer_access_token', accessToken);
+    localStorage.setItem('rozer_token', accessToken);
+    if (refreshToken) {
+      localStorage.setItem('rozer_refresh_token', refreshToken);
+    }
+
+    setToken(accessToken);
     setUser(userData);
     await fetchProfile();
     return res.data;
   };
 
-  const logout = () => {
-    localStorage.removeItem('rozer_token');
-    setToken(null);
-    setUser(null);
-    setStats(null);
+  const logout = async () => {
+    try {
+      await API.post('/auth/logout');
+    } catch (err) {
+      // Ignore logout network errors
+    } finally {
+      localStorage.removeItem('rozer_access_token');
+      localStorage.removeItem('rozer_token');
+      localStorage.removeItem('rozer_refresh_token');
+      setToken(null);
+      setUser(null);
+      setStats(null);
+    }
   };
 
   return (

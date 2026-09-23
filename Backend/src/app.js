@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const path = require('path');
 const errorHandler = require('./middleware/error.middleware');
 
@@ -26,6 +27,7 @@ app.use(
 );
 app.use(express.json({ limit: '16kb' }));
 app.use(express.urlencoded({ extended: true, limit: '16kb' }));
+app.use(cookieParser());
 
 // Serve local uploads folder (fallback asset serving)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
