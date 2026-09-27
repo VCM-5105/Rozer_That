@@ -190,8 +190,8 @@ const QuizPlayer = ({ quizId, onBack }) => {
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400">
               <Award className="w-10 h-10" />
             </div>
-            <h3 className="text-2xl font-extrabold text-[var(--text-primary)] military-font uppercase mb-1">
-              Quiz Completed Cadet!
+            <h3 className="text-2xl font-extrabold text-[var(--text-primary)] uppercase mb-1">
+              Quiz Completed!
             </h3>
             <p className="text-sm text-[var(--text-secondary)] mb-6">Here is your performance breakdown</p>
 

@@ -29,12 +29,12 @@ const GuestGuardModal = () => {
             <ShieldAlert className="w-8 h-8" />
           </div>
 
-          <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2 military-font uppercase tracking-wider">
-            Cadet Authentication Required
+          <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2 uppercase tracking-wider">
+            Authentication Required
           </h3>
 
           <p className="text-sm text-[var(--text-secondary)] mb-6">
-            Guest cadets can read study sheets and articles freely. However, to <span className="font-semibold text-teal-500">{actionName || 'access personal tracking'}</span>, please log in or create a student account.
+            Guest users can read study sheets and articles freely. However, to <span className="font-semibold text-teal-500">{actionName || 'access personal tracking'}</span>, please log in or create an account.
           </p>
 
           <div className="flex flex-col gap-3">

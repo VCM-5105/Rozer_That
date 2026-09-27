@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { GuestGuardProvider } from './context/GuestGuardContext';
@@ -27,7 +27,7 @@ import AdminDashboard from './pages/AdminDashboard';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  if (loading) return <div className="py-16 text-center">Verifying Cadet Identity...</div>;
+  if (loading) return <div className="py-16 text-center">Verifying Identity...</div>;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   return children;
 };
@@ -42,6 +42,23 @@ const AdminRoute = ({ children }) => {
 
 const AppContent = () => {
   const [searchOpen, setSearchOpen] = useState(false);
+  const location = useLocation();
+
+  const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname);
+
+  if (isAuthPage) {
+    return (
+      <div className="min-h-screen w-full bg-[#0a0c0f] text-white flex flex-col justify-center items-center p-4">
+        <main className="w-full max-w-md">
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+          </Routes>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300">
@@ -54,9 +71,6 @@ const AppContent = () => {
         <main className="flex-1 min-w-0">
           <Routes>
             <Route path="/" element={<Home onOpenSearch={() => setSearchOpen(true)} />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/sheets" element={<Sheets />} />
             <Route path="/sheets/:slug" element={<SheetDetail />} />

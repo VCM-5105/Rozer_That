@@ -44,18 +44,18 @@ const Dashboard = () => {
     }
   };
 
-  if (loading) return <div className="py-16 text-center text-[var(--text-secondary)]">Loading Cadet Analytics...</div>;
+  if (loading) return <div className="py-16 text-center text-[var(--text-secondary)]">Loading Dashboard Analytics...</div>;
 
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
       <div className="p-8 rounded-3xl bg-gradient-to-r from-teal-900 via-slate-900 to-slate-800 text-white shadow-xl border border-slate-700/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/20 text-teal-400 text-xs font-semibold military-font uppercase">
-            Official Cadet Operations Command 🎖️
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/20 text-teal-400 text-xs font-semibold uppercase">
+            Operations Command 🎖️
           </div>
-          <h1 className="text-3xl font-extrabold military-font">
-            Welcome back, Cadet <span className="text-teal-400">{user?.username}</span>!
+          <h1 className="text-3xl font-extrabold">
+            Welcome back, <span className="text-teal-400">{user?.username}</span>!
           </h1>
           <p className="text-xs text-slate-300">
             Keep your preparation momentum strong. Target defense exams: NDA • CDS • AFCAT
