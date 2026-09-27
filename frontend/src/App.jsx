@@ -66,7 +66,7 @@ const AppContent = () => {
       <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
       <GuestGuardModal />
 
-      <div className="flex-1 flex max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="flex-1 flex w-full max-w-[98%] xl:max-w-[1440px] mx-auto px-3 sm:px-5 py-6 gap-6 lg:gap-8">
         <Sidebar />
         <main className="flex-1 min-w-0">
           <Routes>

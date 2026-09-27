@@ -4,30 +4,46 @@
   --bg-card: #ffffff;
   --text-primary: #0f172a;
   --text-secondary: #475569;
-  --border-color: #e2e8f0;
-  --sidebar-bg: #1e293b;
-  --sidebar-text: #f8fafc;
-  --sidebar-hover: #334155;
+  --border-color: #cbd5e1;
+  --sidebar-bg: #ffffff;
+  --sidebar-text: #0f172a;
+  --sidebar-hover: #f1f5f9;
   --button-primary: #0d9488;
   --button-primary-hover: #0f766e;
   --gold-accent: #d97706;
-  --shadow: rgba(0, 0, 0, 0.05);
+  --shadow: rgba(0, 0, 0, 0.08);
 }
 
 [data-theme="dark"] {
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-card: #1e293b;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --border-color: #334155;
-  --sidebar-bg: #090d16;
-  --sidebar-text: #f8fafc;
-  --sidebar-hover: #1e293b;
+  --bg-primary: #090b0e;
+  --bg-secondary: #0f1218;
+  --bg-card: #13161e;
+  --text-primary: #e2e8f0;
+  --text-secondary: #8b9bb4;
+  --border-color: #1f2533;
+  --sidebar-bg: #13161e;
+  --sidebar-text: #e2e8f0;
+  --sidebar-hover: #171c26;
   --button-primary: #14b8a6;
   --button-primary-hover: #0d9488;
   --gold-accent: #f59e0b;
-  --shadow: rgba(0, 0, 0, 0.4);
+  --shadow: rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="light"] {
+  --bg-primary: #f1f5f9;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --border-color: #cbd5e1;
+  --sidebar-bg: #ffffff;
+  --sidebar-text: #0f172a;
+  --sidebar-hover: #f1f5f9;
+  --button-primary: #0d9488;
+  --button-primary-hover: #0f766e;
+  --gold-accent: #d97706;
+  --shadow: rgba(0, 0, 0, 0.08);
 }
 
 body {
@@ -35,6 +51,7 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1, h2, h3, .military-font {
@@ -49,12 +66,11 @@ h1, h2, h3, .military-font {
 }
 
 .military-badge {
-  background: linear-gradient(135deg, rgba(217, 119, 6, 0.15), rgba(13, 148, 136, 0.15));
-  border: 1px solid rgba(217, 119, 6, 0.3);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(13, 148, 136, 0.15));
+  border: 1px solid rgba(245, 158, 11, 0.3);
   color: var(--gold-accent);
 }
 
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
