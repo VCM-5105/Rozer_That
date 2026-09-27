@@ -217,19 +217,29 @@ const PYQs = () => {
               </div>
 
               <div className="p-4 rounded-2xl bg-[var(--bg-primary)] border-2 border-dashed border-amber-500/40 space-y-3">
-                <label className="block text-xs font-bold text-[var(--text-primary)] uppercase flex items-center gap-2">
-                  <FileUp className="w-5 h-5 text-amber-500" /> Select PDF File from Device
+                <label className="block text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                  <FileUp className="w-5 h-5 text-amber-500" /> Select PDF File (e.g. pyq-2021.pdf)
                 </label>
-                <input
-                  type="file"
-                  accept=".pdf,application/pdf"
-                  required={!newPyq.file_url}
-                  onChange={handlePdfUpload}
-                  className="block w-full text-xs text-[var(--text-secondary)] file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-600 file:text-white hover:file:bg-amber-700 cursor-pointer"
-                />
+                
+                <div className="flex items-center gap-3">
+                  <label htmlFor="modal-pyq-file" className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center gap-2 cursor-pointer shadow-md military-font uppercase">
+                    <FileUp className="w-4 h-4" /> Choose File
+                  </label>
+                  <input
+                    id="modal-pyq-file"
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    onChange={handlePdfUpload}
+                    className="hidden"
+                  />
+                  <span className="text-xs text-[var(--text-secondary)] font-mono">
+                    {newPyq.fileName ? newPyq.fileName : 'No file chosen'}
+                  </span>
+                </div>
+
                 {newPyq.fileName && (
-                  <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 text-xs font-bold flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-amber-500" /> Attached: {newPyq.fileName}
+                  <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 text-xs font-bold flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Selected PDF: {newPyq.fileName}
                   </div>
                 )}
               </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, Bell, FileText, Newspaper, Award, Plus, Trash2, Edit3, CheckCircle2, BookOpen, Upload, FileUp, Paperclip } from 'lucide-react';
+import { Shield, Users, Bell, FileText, Newspaper, Award, Plus, Trash2, Edit3, CheckCircle2, BookOpen, Upload, FileUp, Paperclip, FolderPlus } from 'lucide-react';
 import API from '../services/api';
 
 const AdminDashboard = () => {
@@ -14,7 +14,7 @@ const AdminDashboard = () => {
   const [newsForm, setNewsForm] = useState({ title: '', category: 'Defence', content: '', date: '' });
   const [quoteForm, setQuoteForm] = useState({ quote: '', author: '' });
 
-  const [sheetForm, setSheetForm] = useState({ title: '', category: 'NDA', description: '', slug: '' });
+  const [sheetForm, setSheetForm] = useState({ title: '', category: 'NDA', description: '', slug: '', pdf_url: '', pdfName: '' });
   const [topicForm, setTopicForm] = useState({ sheet_id: '', title: '', subject: 'Mathematics', difficulty: 'Medium', notes_content: '', pdf_url: '', pdfName: '' });
 
   const [statusMsg, setStatusMsg] = useState('');
@@ -64,6 +64,20 @@ const AdminDashboard = () => {
     reader.readAsDataURL(file);
   };
 
+  const handleSheetPdfUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (uploadEvent) => {
+      setSheetForm(prev => ({
+        ...prev,
+        pdf_url: uploadEvent.target.result,
+        pdfName: file.name
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleTopicPdfUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -87,7 +101,7 @@ const AdminDashboard = () => {
         setSheetsList(prev => [...prev, { ...payload, id: Date.now(), totalTopics: 0 }]);
       });
       setStatusMsg('Study Sheet created successfully!');
-      setSheetForm({ title: '', category: 'NDA', description: '', slug: '' });
+      setSheetForm({ title: '', category: 'NDA', description: '', slug: '', pdf_url: '', pdfName: '' });
       fetchAdminData();
     } catch (err) {
       setStatusMsg('Failed to create study sheet.');
@@ -139,7 +153,7 @@ const AdminDashboard = () => {
     e.preventDefault();
     try {
       await API.post('/pyqs', pyqForm);
-      setStatusMsg('PYQ paper created with PDF attachment!');
+      setStatusMsg('PYQ paper uploaded!');
       setPyqForm({ title: '', exam: 'NDA', year: '2026', paper_type: 'Mathematics', file_url: '', fileName: '' });
       fetchAdminData();
     } catch (err) {
@@ -228,7 +242,7 @@ const AdminDashboard = () => {
           { key: 'add-sheet', label: '+ Add Study Sheet' },
           { key: 'add-topic', label: '+ Add Topic & Notes' },
           { key: 'manage-sheets', label: 'Manage Sheets' },
-          { key: 'pyq', label: 'Add PYQ (Upload PDF)' },
+          { key: 'pyq', label: 'ADD PYQ (Choose File)' },
           { key: 'notif', label: 'Add Notification' },
           { key: 'news', label: 'Publish News' },
           { key: 'quote', label: 'Add Quote' }
@@ -329,6 +343,28 @@ const AdminDashboard = () => {
               onChange={(e) => setSheetForm({ ...sheetForm, description: e.target.value })}
               className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
             />
+
+            <div className="p-4 rounded-2xl bg-[var(--bg-primary)] border-2 border-dashed border-teal-500/30 space-y-3">
+              <label className="block text-xs font-bold text-[var(--text-primary)] uppercase flex items-center gap-2">
+                <Paperclip className="w-4 h-4 text-teal-500" /> Attach Study Sheet PDF Document (Optional)
+              </label>
+              <div className="flex items-center gap-3">
+                <label htmlFor="admin-sheet-file" className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold flex items-center gap-2 cursor-pointer shadow-md military-font uppercase">
+                  <FileUp className="w-4 h-4" /> Choose File
+                </label>
+                <input
+                  id="admin-sheet-file"
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={handleSheetPdfUpload}
+                  className="hidden"
+                />
+                <span className="text-xs text-[var(--text-secondary)] font-mono">
+                  {sheetForm.pdfName ? sheetForm.pdfName : 'No file chosen'}
+                </span>
+              </div>
+            </div>
+
             <button type="submit" className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-sm military-font cursor-pointer">
               Create Study Sheet
             </button>
@@ -390,21 +426,25 @@ const AdminDashboard = () => {
               className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
             />
 
-            <div className="p-4 rounded-xl bg-[var(--bg-primary)] border border-dashed border-[var(--border-color)] space-y-2">
-              <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase flex items-center gap-1.5">
+            <div className="p-4 rounded-2xl bg-[var(--bg-primary)] border-2 border-dashed border-teal-500/30 space-y-3">
+              <label className="block text-xs font-bold text-[var(--text-primary)] uppercase flex items-center gap-2">
                 <Paperclip className="w-4 h-4 text-teal-500" /> Attach Study Material PDF (Optional)
               </label>
-              <input
-                type="file"
-                accept=".pdf,application/pdf"
-                onChange={handleTopicPdfUpload}
-                className="block w-full text-xs text-[var(--text-secondary)] file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-teal-600 file:text-white hover:file:bg-teal-700 cursor-pointer"
-              />
-              {topicForm.pdfName && (
-                <span className="inline-block text-[11px] font-bold text-teal-500 bg-teal-500/10 px-2.5 py-1 rounded-lg">
-                  ✓ PDF Attached: {topicForm.pdfName}
+              <div className="flex items-center gap-3">
+                <label htmlFor="admin-topic-file" className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold flex items-center gap-2 cursor-pointer shadow-md military-font uppercase">
+                  <FileUp className="w-4 h-4" /> Choose File
+                </label>
+                <input
+                  id="admin-topic-file"
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={handleTopicPdfUpload}
+                  className="hidden"
+                />
+                <span className="text-xs text-[var(--text-secondary)] font-mono">
+                  {topicForm.pdfName ? topicForm.pdfName : 'No file chosen'}
                 </span>
-              )}
+              </div>
             </div>
 
             <button type="submit" className="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl text-sm military-font cursor-pointer">
@@ -442,7 +482,8 @@ const AdminDashboard = () => {
 
         {activeTab === 'pyq' && (
           <form onSubmit={handleCreatePYQ} className="space-y-4 max-w-xl">
-            <h3 className="font-bold text-lg text-[var(--text-primary)] military-font uppercase">Add PYQ Paper (Upload PDF)</h3>
+            <h3 className="font-bold text-lg text-[var(--text-primary)] military-font uppercase">ADD PYQ PAPER (Upload PDF File)</h3>
+            
             <input
               type="text"
               required
@@ -451,6 +492,7 @@ const AdminDashboard = () => {
               onChange={(e) => setPyqForm({ ...pyqForm, title: e.target.value })}
               className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
             />
+
             <div className="grid grid-cols-3 gap-4">
               <select
                 value={pyqForm.exam}
@@ -477,34 +519,36 @@ const AdminDashboard = () => {
               />
             </div>
 
-            <div className="p-5 rounded-2xl bg-[var(--bg-primary)] border-2 border-dashed border-amber-500/40 space-y-3">
-              <label className="block text-xs font-bold text-[var(--text-primary)] uppercase flex items-center gap-2">
-                <FileUp className="w-5 h-5 text-amber-500" /> Select Official Question Paper PDF
+            <div className="p-5 rounded-2xl bg-[var(--bg-primary)] border-2 border-dashed border-amber-500/50 space-y-3">
+              <label className="block text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                <FileUp className="w-5 h-5 text-amber-500" /> Select Official Question Paper PDF (e.g. pyq-2021.pdf)
               </label>
-              <input
-                type="file"
-                accept=".pdf,application/pdf"
-                required={!pyqForm.file_url}
-                onChange={handlePyqPdfUpload}
-                className="block w-full text-xs text-[var(--text-secondary)] file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-600 file:text-white hover:file:bg-amber-700 cursor-pointer"
-              />
-              {pyqForm.fileName ? (
-                <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-amber-500" /> Ready for upload: {pyqForm.fileName}
-                </div>
-              ) : (
+              
+              <div className="flex items-center gap-3">
+                <label htmlFor="admin-pyq-file" className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center gap-2 cursor-pointer shadow-md military-font uppercase">
+                  <FileUp className="w-4 h-4" /> Choose File
+                </label>
                 <input
-                  type="text"
-                  placeholder=""
-                  value={pyqForm.file_url}
-                  onChange={(e) => setPyqForm({ ...pyqForm, file_url: e.target.value })}
-                  className="w-full p-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs outline-none text-[var(--text-primary)]"
+                  id="admin-pyq-file"
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={handlePyqPdfUpload}
+                  className="hidden"
                 />
+                <span className="text-xs text-[var(--text-secondary)] font-mono">
+                  {pyqForm.fileName ? pyqForm.fileName : 'No file chosen'}
+                </span>
+              </div>
+
+              {pyqForm.fileName && (
+                <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Selected PDF: {pyqForm.fileName}
+                </div>
               )}
             </div>
 
             <button type="submit" className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-sm military-font cursor-pointer shadow-lg w-full flex items-center justify-center gap-2">
-              <Upload className="w-4 h-4" /> Upload & Save PYQ Paper
+              <Upload className="w-4 h-4" /> Upload & Create PYQ Record
             </button>
           </form>
         )}
