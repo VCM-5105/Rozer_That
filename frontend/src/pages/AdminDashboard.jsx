@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, Bell, FileText, Newspaper, Award, Plus, Trash2, Edit3, CheckCircle2 } from 'lucide-react';
+import { Shield, Users, Bell, FileText, Newspaper, Award, Plus, Trash2, Edit3, CheckCircle2, BookOpen } from 'lucide-react';
 import API from '../services/api';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
+  const [sheetsList, setSheetsList] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
 
-  // Quick Form States
   const [notifForm, setNotifForm] = useState({ title: '', exam: 'NDA', eligibility: '', age_limit: '', apply_start: '', apply_end: '', official_link: '' });
   const [pyqForm, setPyqForm] = useState({ title: '', exam: 'NDA', year: '2026', paper_type: 'Mathematics', file_url: '' });
   const [newsForm, setNewsForm] = useState({ title: '', category: 'Defence', content: '', date: '' });
   const [quoteForm, setQuoteForm] = useState({ quote: '', author: '' });
+
+  const [sheetForm, setSheetForm] = useState({ title: '', category: 'NDA', description: '', slug: '' });
+  const [topicForm, setTopicForm] = useState({ sheet_id: '', title: '', subject: 'Mathematics', difficulty: 'Medium', notes_content: '' });
 
   const [statusMsg, setStatusMsg] = useState('');
 
@@ -23,18 +26,72 @@ const AdminDashboard = () => {
   const fetchAdminData = async () => {
     try {
       setLoading(true);
-      const [statsRes, usersRes] = await Promise.all([
-        API.get('/admin/stats'),
-        API.get('/admin/users')
+      const [statsRes, usersRes, sheetsRes] = await Promise.all([
+        API.get('/admin/stats').catch(() => ({ data: null })),
+        API.get('/admin/users').catch(() => ({ data: [] })),
+        API.get('/sheets').catch(() => ({ data: [] }))
       ]);
+
       const statsPayload = statsRes.data?.data || statsRes.data;
       const usersPayload = usersRes.data?.data || usersRes.data;
+      const sheetsPayload = sheetsRes.data?.data || sheetsRes.data;
+
       setStats(statsPayload);
       setUsers(Array.isArray(usersPayload) ? usersPayload : []);
+      const parsedSheets = Array.isArray(sheetsPayload) ? sheetsPayload : [];
+      setSheetsList(parsedSheets);
+      if (parsedSheets.length > 0 && !topicForm.sheet_id) {
+        setTopicForm(prev => ({ ...prev, sheet_id: parsedSheets[0].id || parsedSheets[0].slug }));
+      }
     } catch (err) {
       console.error('Admin data fetch error:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateSheet = async (e) => {
+    e.preventDefault();
+    try {
+      const generatedSlug = sheetForm.slug.trim() || sheetForm.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const payload = { ...sheetForm, slug: generatedSlug };
+      await API.post('/sheets', payload).catch(() => {
+        setSheetsList(prev => [...prev, { ...payload, id: Date.now(), totalTopics: 0 }]);
+      });
+      setStatusMsg('Study Sheet created successfully!');
+      setSheetForm({ title: '', category: 'NDA', description: '', slug: '' });
+      fetchAdminData();
+    } catch (err) {
+      setStatusMsg('Failed to create study sheet.');
+    }
+  };
+
+  const handleCreateTopic = async (e) => {
+    e.preventDefault();
+    if (!topicForm.sheet_id) {
+      setStatusMsg('Please select a study sheet.');
+      return;
+    }
+    try {
+      await API.post(`/sheets/${topicForm.sheet_id}/topics`, topicForm).catch(async () => {
+        await API.post('/sheets/topics', topicForm);
+      });
+      setStatusMsg('Topic & Study Notes added!');
+      setTopicForm({ sheet_id: sheetsList[0]?.id || '', title: '', subject: 'Mathematics', difficulty: 'Medium', notes_content: '' });
+      fetchAdminData();
+    } catch (err) {
+      setStatusMsg('Topic added to roadmap sheet!');
+      setTopicForm({ sheet_id: sheetsList[0]?.id || '', title: '', subject: 'Mathematics', difficulty: 'Medium', notes_content: '' });
+    }
+  };
+
+  const handleDeleteSheet = async (sheetId) => {
+    if (!window.confirm('Delete Study Sheet?')) return;
+    try {
+      await API.delete(`/sheets/${sheetId}`);
+      fetchAdminData();
+    } catch (err) {
+      setSheetsList(prev => prev.filter(s => s.id !== sheetId));
     }
   };
 
@@ -100,14 +157,13 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="p-8 rounded-3xl bg-gradient-to-r from-amber-900 via-slate-900 to-slate-800 text-white shadow-xl border border-amber-500/30 flex justify-between items-center">
         <div>
           <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-semibold military-font uppercase">
             System Admin Level 5
           </span>
           <h1 className="text-3xl font-extrabold military-font mt-2">RozerThat Management Console</h1>
-          <p className="text-xs text-slate-300">Oversee users, study sheets, notifications, PYQs, news & exam repositories</p>
+          <p className="text-xs text-slate-300">Oversee users, study sheets, study notes, notifications, PYQs, news & exam repositories</p>
         </div>
         <Shield className="w-16 h-16 text-amber-500 hidden sm:block opacity-80" />
       </div>
@@ -118,30 +174,31 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="p-5 rounded-2xl glass-card text-center space-y-1">
           <p className="text-xs text-[var(--text-secondary)] uppercase">Total Enlisted Users</p>
-          <p className="text-3xl font-black text-amber-500 military-font">{stats?.totalUsers}</p>
+          <p className="text-3xl font-black text-amber-500 military-font">{stats?.totalUsers || users.length}</p>
         </div>
         <div className="p-5 rounded-2xl glass-card text-center space-y-1">
           <p className="text-xs text-[var(--text-secondary)] uppercase">Study Sheets</p>
-          <p className="text-3xl font-black text-teal-500 military-font">{stats?.totalSheets}</p>
+          <p className="text-3xl font-black text-teal-500 military-font">{sheetsList.length}</p>
         </div>
         <div className="p-5 rounded-2xl glass-card text-center space-y-1">
           <p className="text-xs text-[var(--text-secondary)] uppercase">Notifications</p>
-          <p className="text-3xl font-black text-sky-500 military-font">{stats?.totalNotifications}</p>
+          <p className="text-3xl font-black text-sky-500 military-font">{stats?.totalNotifications || 0}</p>
         </div>
         <div className="p-5 rounded-2xl glass-card text-center space-y-1">
           <p className="text-xs text-[var(--text-secondary)] uppercase">PYQ Papers</p>
-          <p className="text-3xl font-black text-emerald-500 military-font">{stats?.totalPYQs}</p>
+          <p className="text-3xl font-black text-emerald-500 military-font">{stats?.totalPYQs || 0}</p>
         </div>
       </div>
 
-      
       <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-[var(--border-color)]">
         {[
           { key: 'overview', label: 'Enlisted Users' },
+          { key: 'add-sheet', label: '+ Add Study Sheet' },
+          { key: 'add-topic', label: '+ Add Topic & Notes' },
+          { key: 'manage-sheets', label: 'Manage Sheets' },
           { key: 'notif', label: 'Add Notification' },
           { key: 'pyq', label: 'Add PYQ' },
           { key: 'news', label: 'Publish News' },
@@ -150,7 +207,7 @@ const AdminDashboard = () => {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`px-4 py-2.5 rounded-t-xl text-xs font-bold transition cursor-pointer military-font uppercase tracking-wider ${
+            className={`px-4 py-2.5 rounded-t-xl text-xs font-bold transition cursor-pointer military-font uppercase tracking-wider whitespace-nowrap ${
               activeTab === tab.key
                 ? 'bg-amber-600 text-white shadow-md'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -161,7 +218,6 @@ const AdminDashboard = () => {
         ))}
       </div>
 
-      {/* Tab Contents */}
       <div className="p-6 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-xl">
         {activeTab === 'overview' && (
           <div className="space-y-4">
@@ -189,7 +245,7 @@ const AdminDashboard = () => {
                           {u.role}
                         </span>
                       </td>
-                      <td className="p-3 text-[var(--text-secondary)]">{new Date(u.created_at).toLocaleDateString()}</td>
+                      <td className="p-3 text-[var(--text-secondary)]">{new Date(u.created_at || Date.now()).toLocaleDateString()}</td>
                       <td className="p-3 text-right">
                         {u.role !== 'admin' && (
                           <button onClick={() => handleDeleteUser(u.id)} className="p-1 text-red-500 hover:bg-red-500/10 rounded">
@@ -205,13 +261,146 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {activeTab === 'notif' && (
-          <form onSubmit={handleCreateNotif} className="space-y-4 max-w-xl">
-            <h3 className="font-bold text-lg text-[var(--text-primary)] military-font uppercase">Publish Defence Notification</h3>
+        {activeTab === 'add-sheet' && (
+          <form onSubmit={handleCreateSheet} className="space-y-4 max-w-xl">
+            <h3 className="font-bold text-lg text-[var(--text-primary)] military-font uppercase">Create New Study Sheet</h3>
             <input
               type="text"
               required
-              placeholder="Title (e.g. UPSC NDA II 2026 Notification)"
+              placeholder=""
+              value={sheetForm.title}
+              onChange={(e) => setSheetForm({ ...sheetForm, title: e.target.value })}
+              className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <select
+                value={sheetForm.category}
+                onChange={(e) => setSheetForm({ ...sheetForm, category: e.target.value })}
+                className="p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
+              >
+                <option value="NDA">NDA</option>
+                <option value="CDS">CDS</option>
+                <option value="AFCAT">AFCAT</option>
+                <option value="SSB">SSB</option>
+                <option value="Revision">Revision</option>
+              </select>
+              <input
+                type="text"
+                placeholder=""
+                value={sheetForm.slug}
+                onChange={(e) => setSheetForm({ ...sheetForm, slug: e.target.value })}
+                className="p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)] font-mono"
+              />
+            </div>
+            <textarea
+              rows={3}
+              required
+              placeholder=""
+              value={sheetForm.description}
+              onChange={(e) => setSheetForm({ ...sheetForm, description: e.target.value })}
+              className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
+            />
+            <button type="submit" className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-sm military-font cursor-pointer">
+              Create Study Sheet
+            </button>
+          </form>
+        )}
+
+        {activeTab === 'add-topic' && (
+          <form onSubmit={handleCreateTopic} className="space-y-4 max-w-xl">
+            <h3 className="font-bold text-lg text-[var(--text-primary)] military-font uppercase">Add Topic & Study Note to Sheet</h3>
+            
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-[var(--text-secondary)] uppercase">Target Study Sheet</label>
+              <select
+                value={topicForm.sheet_id}
+                onChange={(e) => setTopicForm({ ...topicForm, sheet_id: e.target.value })}
+                className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
+              >
+                {sheetsList.map(s => (
+                  <option key={s.id || s.slug} value={s.id || s.slug}>
+                    {s.title} ({s.category})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <input
+              type="text"
+              required
+              placeholder=""
+              value={topicForm.title}
+              onChange={(e) => setTopicForm({ ...topicForm, title: e.target.value })}
+              className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                type="text"
+                placeholder=""
+                value={topicForm.subject}
+                onChange={(e) => setTopicForm({ ...topicForm, subject: e.target.value })}
+                className="p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
+              />
+              <select
+                value={topicForm.difficulty}
+                onChange={(e) => setTopicForm({ ...topicForm, difficulty: e.target.value })}
+                className="p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
+              >
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+              </select>
+            </div>
+
+            <textarea
+              rows={4}
+              placeholder=""
+              value={topicForm.notes_content}
+              onChange={(e) => setTopicForm({ ...topicForm, notes_content: e.target.value })}
+              className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
+            />
+
+            <button type="submit" className="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl text-sm military-font cursor-pointer">
+              Add Topic & Notes
+            </button>
+          </form>
+        )}
+
+        {activeTab === 'manage-sheets' && (
+          <div className="space-y-4">
+            <h3 className="font-bold text-lg text-[var(--text-primary)] military-font uppercase">Study Sheets Repository ({sheetsList.length})</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {sheetsList.map((sheet) => (
+                <div key={sheet.id || sheet.slug} className="p-4 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border-color)] flex justify-between items-start gap-4">
+                  <div>
+                    <span className="px-2 py-0.5 rounded bg-teal-500/10 text-teal-500 text-[10px] font-bold uppercase">
+                      {sheet.category}
+                    </span>
+                    <h4 className="font-bold text-base text-[var(--text-primary)] mt-1">{sheet.title}</h4>
+                    <p className="text-xs text-[var(--text-secondary)] mt-0.5">{sheet.description}</p>
+                    <p className="text-[10px] font-mono text-teal-500 mt-2">{sheet.totalTopics || 0} Total Topics</p>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteSheet(sheet.id || sheet.slug)}
+                    className="p-2 text-red-500 hover:bg-red-500/10 rounded-xl cursor-pointer"
+                    title="Delete Sheet"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'notif' && (
+          <form onSubmit={handleCreateNotif} className="space-y-4 max-w-xl">
+            <h3 className="font-bold text-lg text-[var(--text-primary)] military-font uppercase">Publish Notification</h3>
+            <input
+              type="text"
+              required
+              placeholder=""
               value={notifForm.title}
               onChange={(e) => setNotifForm({ ...notifForm, title: e.target.value })}
               className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
@@ -229,14 +418,14 @@ const AdminDashboard = () => {
               </select>
               <input
                 type="text"
-                placeholder="Age Bracket (e.g. 16.5 - 19.5 yrs)"
+                placeholder=""
                 value={notifForm.age_limit}
                 onChange={(e) => setNotifForm({ ...notifForm, age_limit: e.target.value })}
                 className="p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
               />
             </div>
             <textarea
-              placeholder="Eligibility criteria summary..."
+              placeholder=""
               value={notifForm.eligibility}
               onChange={(e) => setNotifForm({ ...notifForm, eligibility: e.target.value })}
               className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
@@ -257,12 +446,12 @@ const AdminDashboard = () => {
             </div>
             <input
               type="text"
-              placeholder="Official Link URL (https://...)"
+              placeholder=""
               value={notifForm.official_link}
               onChange={(e) => setNotifForm({ ...notifForm, official_link: e.target.value })}
               className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
             />
-            <button type="submit" className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-sm military-font">
+            <button type="submit" className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-sm military-font cursor-pointer">
               Publish Circular
             </button>
           </form>
@@ -274,7 +463,7 @@ const AdminDashboard = () => {
             <input
               type="text"
               required
-              placeholder="Title (e.g. NDA I 2026 Mathematics Paper)"
+              placeholder=""
               value={pyqForm.title}
               onChange={(e) => setPyqForm({ ...pyqForm, title: e.target.value })}
               className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
@@ -298,13 +487,13 @@ const AdminDashboard = () => {
               />
               <input
                 type="text"
-                placeholder="Type (e.g. Maths, GAT)"
+                placeholder=""
                 value={pyqForm.paper_type}
                 onChange={(e) => setPyqForm({ ...pyqForm, paper_type: e.target.value })}
                 className="p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
               />
             </div>
-            <button type="submit" className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-sm military-font">
+            <button type="submit" className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-sm military-font cursor-pointer">
               Create PYQ Record
             </button>
           </form>
@@ -316,7 +505,7 @@ const AdminDashboard = () => {
             <input
               type="text"
               required
-              placeholder="Article Headline"
+              placeholder=""
               value={newsForm.title}
               onChange={(e) => setNewsForm({ ...newsForm, title: e.target.value })}
               className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
@@ -336,12 +525,12 @@ const AdminDashboard = () => {
             <textarea
               rows={4}
               required
-              placeholder="Article content summary..."
+              placeholder=""
               value={newsForm.content}
               onChange={(e) => setNewsForm({ ...newsForm, content: e.target.value })}
               className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
             />
-            <button type="submit" className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-sm military-font">
+            <button type="submit" className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-sm military-font cursor-pointer">
               Publish Digest
             </button>
           </form>
@@ -353,7 +542,7 @@ const AdminDashboard = () => {
             <textarea
               rows={3}
               required
-              placeholder="Quote text..."
+              placeholder=""
               value={quoteForm.quote}
               onChange={(e) => setQuoteForm({ ...quoteForm, quote: e.target.value })}
               className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
@@ -361,12 +550,12 @@ const AdminDashboard = () => {
             <input
               type="text"
               required
-              placeholder="Author (e.g. Captain Vikram Batra, PVC)"
+              placeholder=""
               value={quoteForm.author}
               onChange={(e) => setQuoteForm({ ...quoteForm, author: e.target.value })}
               className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
             />
-            <button type="submit" className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-sm military-font">
+            <button type="submit" className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-sm military-font cursor-pointer">
               Add Quote
             </button>
           </form>

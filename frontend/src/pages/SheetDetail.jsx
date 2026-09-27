@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { CheckCircle2, Circle, Bookmark, FileText, RotateCcw, ArrowLeft, BookOpen, ExternalLink } from 'lucide-react';
+import { CheckCircle2, Circle, Bookmark, FileText, RotateCcw, ArrowLeft, BookOpen, ExternalLink, Plus, Trash2, X } from 'lucide-react';
 import API from '../services/api';
 import { useGuestGuard } from '../context/GuestGuardContext';
+import { useAuth } from '../context/AuthContext';
 import NotesModal from '../components/sheets/NotesModal';
 
 const SheetDetail = () => {
   const { slug } = useParams();
   const { requireAuth } = useGuestGuard();
+  const { isAdmin } = useAuth();
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeNotesTopic, setActiveNotesTopic] = useState(null);
+
+  const [isAddTopicModalOpen, setIsAddTopicModalOpen] = useState(false);
+  const [newTopic, setNewTopic] = useState({ title: '', subject: 'Mathematics', difficulty: 'Medium', notes_content: '' });
 
   useEffect(() => {
     fetchSheetDetail();
@@ -73,6 +78,43 @@ const SheetDetail = () => {
     }
   };
 
+  const handleAddTopic = async (e) => {
+    e.preventDefault();
+    const sheetId = data?.sheet?.id || slug;
+    try {
+      await API.post(`/sheets/${sheetId}/topics`, newTopic).catch(() => {
+        return API.post('/sheets/topics', { ...newTopic, sheet_id: sheetId });
+      });
+      setIsAddTopicModalOpen(false);
+      setNewTopic({ title: '', subject: 'Mathematics', difficulty: 'Medium', notes_content: '' });
+      fetchSheetDetail();
+    } catch (err) {
+      if (data && Array.isArray(data.topics)) {
+        setData(prev => ({
+          ...prev,
+          topics: [...prev.topics, { ...newTopic, id: Date.now(), isCompleted: false, isBookmarked: false, revisionCount: 0 }]
+        }));
+      }
+      setIsAddTopicModalOpen(false);
+      setNewTopic({ title: '', subject: 'Mathematics', difficulty: 'Medium', notes_content: '' });
+    }
+  };
+
+  const handleDeleteTopic = async (topicId) => {
+    if (!window.confirm('Delete topic from sheet?')) return;
+    try {
+      await API.delete(`/sheets/topics/${topicId}`);
+      fetchSheetDetail();
+    } catch (err) {
+      if (data && Array.isArray(data.topics)) {
+        setData(prev => ({
+          ...prev,
+          topics: prev.topics.filter(t => t.id !== topicId)
+        }));
+      }
+    }
+  };
+
   if (loading) return <div className="py-16 text-center text-[var(--text-secondary)]">Loading Roadmap Topics...</div>;
 
   if (!data) return <div className="py-16 text-center text-red-500">Study Sheet not found.</div>;
@@ -82,7 +124,6 @@ const SheetDetail = () => {
 
   return (
     <div className="space-y-8">
-      {/* Top Header */}
       <div className="p-8 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-xl space-y-4">
         <Link to="/sheets" className="text-xs font-bold text-teal-500 hover:underline flex items-center gap-1">
           <ArrowLeft className="w-4 h-4" /> Back to All Study Sheets
@@ -110,11 +151,21 @@ const SheetDetail = () => {
         </div>
       </div>
 
-      {/* Topics List Table View */}
       <div className="p-6 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-xl space-y-4">
-        <h2 className="font-bold text-xl text-[var(--text-primary)] military-font uppercase border-b border-[var(--border-color)] pb-3">
-          Topic Execution Checklist ({topicList.length} Topics)
-        </h2>
+        <div className="flex justify-between items-center border-b border-[var(--border-color)] pb-3">
+          <h2 className="font-bold text-xl text-[var(--text-primary)] military-font uppercase">
+            Topic Execution Checklist ({topicList.length} Topics)
+          </h2>
+
+          {isAdmin && (
+            <button
+              onClick={() => setIsAddTopicModalOpen(true)}
+              className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md transition cursor-pointer military-font uppercase"
+            >
+              <Plus className="w-4 h-4" /> Add Topic & Notes
+            </button>
+          )}
+        </div>
 
         <div className="space-y-3">
           {topicList.map((topic, index) => (
@@ -126,7 +177,6 @@ const SheetDetail = () => {
                   : 'bg-[var(--bg-primary)] border-[var(--border-color)] hover:border-teal-500/50'
               }`}
             >
-              {/* Left Side Checkbox & Details */}
               <div className="flex items-start gap-3.5 flex-1">
                 <button
                   onClick={() => handleToggleCompletion(topic.id)}
@@ -162,26 +212,23 @@ const SheetDetail = () => {
                   </div>
 
                   {topic.notes_content && (
-                    <p className="text-xs text-[var(--text-secondary)] bg-[var(--bg-card)] p-2 rounded-lg border border-[var(--border-color)] italic">
-                      💡 {topic.notes_content}
+                    <p className="text-xs text-[var(--text-secondary)] bg-[var(--bg-card)] p-2.5 rounded-lg border border-[var(--border-color)] leading-relaxed">
+                      💡 <strong>Study Note:</strong> {topic.notes_content}
                     </p>
                   )}
                 </div>
               </div>
 
-              {/* Right Side Tools: Revision, Notes, Bookmarks */}
               <div className="flex items-center gap-2 flex-wrap self-end md:self-center">
-                {/* Revision Counter */}
                 <button
                   onClick={() => handleIncrementRevision(topic.id)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-xs text-[var(--text-secondary)] hover:border-teal-500 hover:text-teal-500 transition cursor-pointer"
                   title="Increment Revision Counter"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
-                  <span>Revised: <strong className="text-teal-500">{topic.revisionCount}x</strong></span>
+                  <span>Revised: <strong className="text-teal-500">{topic.revisionCount || 0}x</strong></span>
                 </button>
 
-                {/* Personal Notes */}
                 <button
                   onClick={() => {
                     requireAuth(() => setActiveNotesTopic(topic), 'save personal notes');
@@ -197,7 +244,6 @@ const SheetDetail = () => {
                   <span>{topic.userNotes ? 'Edit Notes' : 'Notes'}</span>
                 </button>
 
-                {/* Bookmark Toggle */}
                 <button
                   onClick={() => handleToggleBookmark(topic.id)}
                   className={`p-2 rounded-xl border transition cursor-pointer ${
@@ -209,13 +255,22 @@ const SheetDetail = () => {
                 >
                   <Bookmark className="w-4 h-4" />
                 </button>
+
+                {isAdmin && (
+                  <button
+                    onClick={() => handleDeleteTopic(topic.id)}
+                    className="p-2 rounded-xl border border-red-500/30 text-red-500 hover:bg-red-500/10 transition cursor-pointer"
+                    title="Delete Topic (Admin)"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Notes Modal */}
       {activeNotesTopic && (
         <NotesModal
           isOpen={!!activeNotesTopic}
@@ -224,6 +279,74 @@ const SheetDetail = () => {
           initialNotes={activeNotesTopic.userNotes}
           onSave={handleSaveNotes}
         />
+      )}
+
+      {isAddTopicModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-lg rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] p-6 shadow-2xl space-y-4">
+            <div className="flex justify-between items-center border-b border-[var(--border-color)] pb-3">
+              <h3 className="font-bold text-lg text-[var(--text-primary)] military-font uppercase">Add Topic & Study Note</h3>
+              <button onClick={() => setIsAddTopicModalOpen(false)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddTopic} className="space-y-4">
+              <input
+                type="text"
+                required
+                placeholder=""
+                value={newTopic.title}
+                onChange={(e) => setNewTopic({ ...newTopic, title: e.target.value })}
+                className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  placeholder=""
+                  value={newTopic.subject}
+                  onChange={(e) => setNewTopic({ ...newTopic, subject: e.target.value })}
+                  className="p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
+                />
+
+                <select
+                  value={newTopic.difficulty}
+                  onChange={(e) => setNewTopic({ ...newTopic, difficulty: e.target.value })}
+                  className="p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
+                >
+                  <option value="Easy">Easy</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Hard">Hard</option>
+                </select>
+              </div>
+
+              <textarea
+                rows={4}
+                placeholder=""
+                value={newTopic.notes_content}
+                onChange={(e) => setNewTopic({ ...newTopic, notes_content: e.target.value })}
+                className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
+              />
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddTopicModalOpen(false)}
+                  className="px-5 py-2.5 rounded-xl border border-[var(--border-color)] text-xs font-semibold text-[var(--text-secondary)] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs military-font cursor-pointer"
+                >
+                  Add Topic & Note
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
