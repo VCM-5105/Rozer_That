@@ -64,7 +64,7 @@ const registerUser = asyncHandler(async (req, res) => {
       new ApiResponse(
         201,
         { user: createdUser, accessToken, refreshToken },
-        'Registration successful! Welcome Cadet.'
+        'Registration successful! Welcome.'
       )
     );
 });

@@ -1,10 +1,11 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, BookOpen, FileCheck, Award, Newspaper, Bell, FileEdit } from 'lucide-react';
+import { LayoutDashboard, BookOpen, FileCheck, Award, Newspaper, Bell, FileEdit, User } from 'lucide-react';
 
 const Sidebar = () => {
   const links = [
     { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { to: '/profile', label: 'My Profile', icon: User },
     { to: '/sheets', label: 'Study Sheets', icon: BookOpen },
     { to: '/mocktests', label: 'Mock Tests', icon: FileCheck },
     { to: '/quizzes', label: 'Quizzes', icon: Award },

@@ -13,6 +13,7 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       fetchProfile();
     } else {
+      setUser(null);
       setLoading(false);
     }
   }, [token]);
@@ -22,11 +23,20 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       const res = await API.get('/auth/me');
       const payload = res.data?.data || res.data;
-      setUser(payload.user);
-      setStats(payload.stats);
+      if (payload && payload.user) {
+        setUser(payload.user);
+        setStats(payload.stats || null);
+      } else {
+        setUser(payload || null);
+      }
     } catch (err) {
       console.error('Auth verify error:', err);
-      logout();
+      localStorage.removeItem('rozer_access_token');
+      localStorage.removeItem('rozer_token');
+      localStorage.removeItem('rozer_refresh_token');
+      setToken(null);
+      setUser(null);
+      setStats(null);
     } finally {
       setLoading(false);
     }
@@ -72,9 +82,9 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await API.post('/auth/logout');
+      await API.post('/auth/logout').catch(() => {});
     } catch (err) {
-      // Ignore logout network errors
+      // Ignore logout errors
     } finally {
       localStorage.removeItem('rozer_access_token');
       localStorage.removeItem('rozer_token');
@@ -82,7 +92,12 @@ export const AuthProvider = ({ children }) => {
       setToken(null);
       setUser(null);
       setStats(null);
+      setLoading(false);
     }
+  };
+
+  const updateUserProfile = (updatedUser) => {
+    setUser(prev => ({ ...prev, ...updatedUser }));
   };
 
   return (
@@ -97,6 +112,7 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
+        updateUserProfile,
         refreshProfile: fetchProfile
       }}
     >

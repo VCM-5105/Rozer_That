@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ChevronDown, LogOut, Shield, Menu, X } from 'lucide-react';
+import { Search, ChevronDown, LogOut, Shield, Menu, X, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
 import logo from '../../assets/logo.png';
@@ -112,9 +112,13 @@ const Navbar = ({ onOpenSearch }) => {
                 onClick={() => setProfileOpen((prev) => !prev)}
                 className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white font-medium text-xs hover:bg-white/20 transition cursor-pointer"
               >
-                <div className="w-6 h-6 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center font-bold text-xs">
-                  {user.username.charAt(0).toUpperCase()}
-                </div>
+                {user.avatar ? (
+                  <img src={user.avatar} alt={user.username} className="w-6 h-6 rounded-full object-cover border border-amber-400" />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center font-bold text-xs">
+                    {user.username.charAt(0).toUpperCase()}
+                  </div>
+                )}
                 <span className="hidden sm:inline">{user.username}</span>
                 <ChevronDown className="w-3.5 h-3.5" />
               </button>
@@ -126,11 +130,18 @@ const Navbar = ({ onOpenSearch }) => {
                     <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
                   </div>
                   <Link
+                    to="/profile"
+                    onClick={() => setProfileOpen(false)}
+                    className="px-4 py-2 hover:bg-white/10 text-xs text-amber-400 font-bold flex items-center gap-2"
+                  >
+                    <User className="w-3.5 h-3.5" /> My Profile & Avatar
+                  </Link>
+                  <Link
                     to="/dashboard"
                     onClick={() => setProfileOpen(false)}
                     className="px-4 py-2 hover:bg-white/10 text-xs text-slate-200 flex items-center gap-2"
                   >
-                    <Shield className="w-3.5 h-3.5 text-teal-400" /> Student Dashboard
+                    Student Dashboard
                   </Link>
                   {user.role === 'admin' && (
                     <Link
@@ -179,21 +190,6 @@ const Navbar = ({ onOpenSearch }) => {
           </button>
         </div>
       </div>
-
-      {mobileMenuOpen && (
-        <div className="md:hidden mt-2 p-4 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl space-y-2 text-sm text-slate-200">
-          <Link to="/sheets?exam=NDA" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-amber-400 font-semibold">NDA Examination</Link>
-          <Link to="/sheets?exam=CDS" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-amber-400 font-semibold">CDS Examination</Link>
-          <Link to="/sheets?exam=AFCAT" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-amber-400 font-semibold">AFCAT Entry</Link>
-          <Link to="/sheets?exam=CAPF" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-amber-400 font-semibold">CAPF (AC)</Link>
-          <div className="border-t border-slate-800 my-2 pt-2" />
-          <Link to="/sheets" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-amber-400">Study Sheets</Link>
-          <Link to="/pyqs" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-amber-400">Previous Year Papers</Link>
-          <Link to="/quizzes" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-amber-400">Quizzes</Link>
-          <Link to="/mocktests" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-amber-400">Mock Tests</Link>
-          <Link to="/current-affairs" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-amber-400">Current Affairs</Link>
-        </div>
-      )}
     </header>
   );
 };

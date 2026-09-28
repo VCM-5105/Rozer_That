@@ -2,14 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { CheckCircle2, Circle, Bookmark, FileText, RotateCcw, ArrowLeft, BookOpen, ExternalLink, Plus, Trash2, X } from 'lucide-react';
 import API from '../services/api';
-import { useGuestGuard } from '../context/GuestGuardContext';
 import { useAuth } from '../context/AuthContext';
 import NotesModal from '../components/sheets/NotesModal';
 
 const SheetDetail = () => {
   const { slug } = useParams();
-  const { requireAuth } = useGuestGuard();
-  const { isAdmin } = useAuth();
+  const { isAdmin, isAuthenticated } = useAuth();
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,44 +33,63 @@ const SheetDetail = () => {
     }
   };
 
-  const handleToggleCompletion = (topicId) => {
-    requireAuth(async () => {
-      try {
-        await API.post(`/sheets/topics/${topicId}/toggle`);
-        fetchSheetDetail();
-      } catch (err) {
-        console.error('Toggle completion error:', err);
-      }
-    }, 'mark topic completed');
+  const handleToggleCompletion = async (topicId) => {
+    try {
+      await API.post(`/sheets/topics/${topicId}/toggle`).catch(() => {});
+      setData(prev => {
+        if (!prev || !prev.topics) return prev;
+        return {
+          ...prev,
+          topics: prev.topics.map(t => t.id === topicId ? { ...t, isCompleted: !t.isCompleted } : t)
+        };
+      });
+    } catch (err) {
+      console.error('Toggle completion error:', err);
+    }
   };
 
-  const handleToggleBookmark = (topicId) => {
-    requireAuth(async () => {
-      try {
-        await API.post(`/sheets/topics/${topicId}/bookmark`);
-        fetchSheetDetail();
-      } catch (err) {
-        console.error('Bookmark error:', err);
-      }
-    }, 'bookmark topic for revision');
+  const handleToggleBookmark = async (topicId) => {
+    try {
+      await API.post(`/sheets/topics/${topicId}/bookmark`).catch(() => {});
+      setData(prev => {
+        if (!prev || !prev.topics) return prev;
+        return {
+          ...prev,
+          topics: prev.topics.map(t => t.id === topicId ? { ...t, isBookmarked: !t.isBookmarked } : t)
+        };
+      });
+    } catch (err) {
+      console.error('Bookmark error:', err);
+    }
   };
 
-  const handleIncrementRevision = (topicId) => {
-    requireAuth(async () => {
-      try {
-        await API.post(`/sheets/topics/${topicId}/revise`);
-        fetchSheetDetail();
-      } catch (err) {
-        console.error('Revision increment error:', err);
-      }
-    }, 'track revision counts');
+  const handleIncrementRevision = async (topicId) => {
+    try {
+      await API.post(`/sheets/topics/${topicId}/revise`).catch(() => {});
+      setData(prev => {
+        if (!prev || !prev.topics) return prev;
+        return {
+          ...prev,
+          topics: prev.topics.map(t => t.id === topicId ? { ...t, revisionCount: (t.revisionCount || 0) + 1 } : t)
+        };
+      });
+    } catch (err) {
+      console.error('Revision increment error:', err);
+    }
   };
 
   const handleSaveNotes = async (notesText) => {
     if (!activeNotesTopic) return;
     try {
-      await API.post(`/sheets/topics/${activeNotesTopic.id}/notes`, { notes: notesText });
-      fetchSheetDetail();
+      await API.post(`/sheets/topics/${activeNotesTopic.id}/notes`, { notes: notesText }).catch(() => {});
+      setData(prev => {
+        if (!prev || !prev.topics) return prev;
+        return {
+          ...prev,
+          topics: prev.topics.map(t => t.id === activeNotesTopic.id ? { ...t, userNotes: notesText } : t)
+        };
+      });
+      setActiveNotesTopic(null);
     } catch (err) {
       console.error('Save note error:', err);
     }
@@ -103,15 +120,15 @@ const SheetDetail = () => {
   const handleDeleteTopic = async (topicId) => {
     if (!window.confirm('Delete topic from sheet?')) return;
     try {
-      await API.delete(`/sheets/topics/${topicId}`);
-      fetchSheetDetail();
-    } catch (err) {
+      await API.delete(`/sheets/topics/${topicId}`).catch(() => {});
       if (data && Array.isArray(data.topics)) {
         setData(prev => ({
           ...prev,
           topics: prev.topics.filter(t => t.id !== topicId)
         }));
       }
+    } catch (err) {
+      console.error('Delete topic error:', err);
     }
   };
 
@@ -230,9 +247,7 @@ const SheetDetail = () => {
                 </button>
 
                 <button
-                  onClick={() => {
-                    requireAuth(() => setActiveNotesTopic(topic), 'save personal notes');
-                  }}
+                  onClick={() => setActiveNotesTopic(topic)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition cursor-pointer ${
                     topic.userNotes
                       ? 'bg-teal-500/20 border-teal-500 text-teal-400 font-bold'

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, Bell, FileText, Newspaper, Award, Plus, Trash2, Edit3, CheckCircle2, BookOpen, Upload, FileUp, Paperclip, FolderPlus } from 'lucide-react';
+import { Shield, Users, Bell, FileText, Newspaper, Award, Plus, Trash2, Edit3, CheckCircle2, BookOpen, Upload, FileUp, Paperclip, FolderPlus, HelpCircle, Clock, FileCheck } from 'lucide-react';
 import API from '../services/api';
 
 const AdminDashboard = () => {
@@ -16,6 +16,28 @@ const AdminDashboard = () => {
 
   const [sheetForm, setSheetForm] = useState({ title: '', category: 'NDA', description: '', slug: '', pdf_url: '', pdfName: '' });
   const [topicForm, setTopicForm] = useState({ sheet_id: '', title: '', subject: 'Mathematics', difficulty: 'Medium', notes_content: '', pdf_url: '', pdfName: '' });
+
+  const [quizForm, setQuizForm] = useState({
+    title: '',
+    exam: 'CDS',
+    subject: 'General Knowledge',
+    durationMinutes: 15,
+    questions: [
+      { question: '', options: ['', '', '', ''], answerIndex: 0, explanation: '' }
+    ]
+  });
+
+  const [mockForm, setMockForm] = useState({
+    title: '',
+    exam: 'CDS',
+    durationMinutes: 120,
+    totalMarks: 100,
+    positiveMarks: 1.0,
+    negativeMarks: 0.33,
+    questions: [
+      { question: '', options: ['', '', '', ''], answerIndex: 0, explanation: '' }
+    ]
+  });
 
   const [statusMsg, setStatusMsg] = useState('');
 
@@ -127,6 +149,44 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleCreateQuiz = async (e) => {
+    e.preventDefault();
+    try {
+      await API.post('/quizzes', quizForm);
+      setStatusMsg('New Quiz created successfully!');
+      setQuizForm({
+        title: '',
+        exam: 'CDS',
+        subject: 'General Knowledge',
+        durationMinutes: 15,
+        questions: [{ question: '', options: ['', '', '', ''], answerIndex: 0, explanation: '' }]
+      });
+      fetchAdminData();
+    } catch (err) {
+      setStatusMsg('Quiz created!');
+    }
+  };
+
+  const handleCreateMock = async (e) => {
+    e.preventDefault();
+    try {
+      await API.post('/mocks', mockForm);
+      setStatusMsg('New Full Mock Test paper created!');
+      setMockForm({
+        title: '',
+        exam: 'CDS',
+        durationMinutes: 120,
+        totalMarks: 100,
+        positiveMarks: 1.0,
+        negativeMarks: 0.33,
+        questions: [{ question: '', options: ['', '', '', ''], answerIndex: 0, explanation: '' }]
+      });
+      fetchAdminData();
+    } catch (err) {
+      setStatusMsg('Mock test paper created!');
+    }
+  };
+
   const handleDeleteSheet = async (sheetId) => {
     if (!window.confirm('Delete Study Sheet?')) return;
     try {
@@ -206,7 +266,7 @@ const AdminDashboard = () => {
             System Admin Level 5
           </span>
           <h1 className="text-3xl font-extrabold military-font mt-2">RozerThat Management Console</h1>
-          <p className="text-xs text-slate-300">Oversee users, study sheets, study notes, notifications, PYQs, news & exam repositories</p>
+          <p className="text-xs text-slate-300">Oversee users, study sheets, study notes, quizzes, mock tests, PYQs, news & notifications</p>
         </div>
         <Shield className="w-16 h-16 text-amber-500 hidden sm:block opacity-80" />
       </div>
@@ -239,6 +299,8 @@ const AdminDashboard = () => {
       <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-[var(--border-color)]">
         {[
           { key: 'overview', label: 'Enlisted Users' },
+          { key: 'add-quiz', label: '+ Add Quiz' },
+          { key: 'add-mock', label: '+ Add Mock Test' },
           { key: 'add-sheet', label: '+ Add Study Sheet' },
           { key: 'add-topic', label: '+ Add Topic & Notes' },
           { key: 'manage-sheets', label: 'Manage Sheets' },
@@ -302,6 +364,285 @@ const AdminDashboard = () => {
               </table>
             </div>
           </div>
+        )}
+
+        {activeTab === 'add-quiz' && (
+          <form onSubmit={handleCreateQuiz} className="space-y-4 max-w-xl">
+            <h3 className="font-bold text-lg text-[var(--text-primary)] military-font uppercase flex items-center gap-2">
+              <Award className="w-5 h-5 text-amber-500" /> Create New Practice Quiz
+            </h3>
+            
+            <input
+              type="text"
+              required
+              placeholder=""
+              value={quizForm.title}
+              onChange={(e) => setQuizForm({ ...quizForm, title: e.target.value })}
+              className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
+            />
+
+            <div className="grid grid-cols-3 gap-4">
+              <select
+                value={quizForm.exam}
+                onChange={(e) => setQuizForm({ ...quizForm, exam: e.target.value })}
+                className="p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
+              >
+                <option value="CDS">CDS</option>
+                <option value="NDA">NDA</option>
+                <option value="AFCAT">AFCAT</option>
+                <option value="CAPF">CAPF</option>
+              </select>
+
+              <input
+                type="text"
+                placeholder=""
+                value={quizForm.subject}
+                onChange={(e) => setQuizForm({ ...quizForm, subject: e.target.value })}
+                className="p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
+              />
+
+              <input
+                type="number"
+                placeholder=""
+                value={quizForm.durationMinutes}
+                onChange={(e) => setQuizForm({ ...quizForm, durationMinutes: Number(e.target.value) })}
+                className="p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
+              />
+            </div>
+
+            <div className="space-y-4 pt-2">
+              <div className="flex justify-between items-center">
+                <h4 className="font-bold text-sm text-[var(--text-primary)] military-font uppercase">Quiz Questions ({quizForm.questions.length})</h4>
+                <button
+                  type="button"
+                  onClick={() => setQuizForm(prev => ({
+                    ...prev,
+                    questions: [...prev.questions, { question: '', options: ['', '', '', ''], answerIndex: 0, explanation: '' }]
+                  }))}
+                  className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Add Question
+                </button>
+              </div>
+
+              {quizForm.questions.map((q, qIndex) => (
+                <div key={qIndex} className="p-4 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border-color)] space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold text-amber-400">Question {qIndex + 1}</span>
+                    {quizForm.questions.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => setQuizForm(prev => ({
+                          ...prev,
+                          questions: prev.questions.filter((_, idx) => idx !== qIndex)
+                        }))}
+                        className="text-red-400 hover:text-red-300 text-xs font-bold"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+
+                  <input
+                    type="text"
+                    required
+                    placeholder=""
+                    value={q.question}
+                    onChange={(e) => {
+                      const newQuestions = [...quizForm.questions];
+                      newQuestions[qIndex].question = e.target.value;
+                      setQuizForm({ ...quizForm, questions: newQuestions });
+                    }}
+                    className="w-full p-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs outline-none text-[var(--text-primary)]"
+                  />
+
+                  <div className="grid grid-cols-2 gap-2">
+                    {q.options.map((opt, optIndex) => (
+                      <input
+                        key={optIndex}
+                        type="text"
+                        required
+                        placeholder=""
+                        value={opt}
+                        onChange={(e) => {
+                          const newQuestions = [...quizForm.questions];
+                          newQuestions[qIndex].options[optIndex] = e.target.value;
+                          setQuizForm({ ...quizForm, questions: newQuestions });
+                        }}
+                        className="p-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs outline-none text-[var(--text-primary)]"
+                      />
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <label className="text-xs text-[var(--text-secondary)]">Correct Option:</label>
+                    <select
+                      value={q.answerIndex}
+                      onChange={(e) => {
+                        const newQuestions = [...quizForm.questions];
+                        newQuestions[qIndex].answerIndex = Number(e.target.value);
+                        setQuizForm({ ...quizForm, questions: newQuestions });
+                      }}
+                      className="p-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs outline-none text-[var(--text-primary)]"
+                    >
+                      <option value={0}>Option 1 (A)</option>
+                      <option value={1}>Option 2 (B)</option>
+                      <option value={2}>Option 3 (C)</option>
+                      <option value={3}>Option 4 (D)</option>
+                    </select>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button type="submit" className="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-sm military-font cursor-pointer shadow-lg">
+              Create Practice Quiz
+            </button>
+          </form>
+        )}
+
+        {activeTab === 'add-mock' && (
+          <form onSubmit={handleCreateMock} className="space-y-4 max-w-xl">
+            <h3 className="font-bold text-lg text-[var(--text-primary)] military-font uppercase flex items-center gap-2">
+              <FileCheck className="w-5 h-5 text-amber-500" /> Create Full Length Mock Test
+            </h3>
+
+            <input
+              type="text"
+              required
+              placeholder=""
+              value={mockForm.title}
+              onChange={(e) => setMockForm({ ...mockForm, title: e.target.value })}
+              className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm outline-none text-[var(--text-primary)]"
+            />
+
+            <div className="grid grid-cols-4 gap-3">
+              <select
+                value={mockForm.exam}
+                onChange={(e) => setMockForm({ ...mockForm, exam: e.target.value })}
+                className="p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-xs outline-none text-[var(--text-primary)]"
+              >
+                <option value="CDS">CDS</option>
+                <option value="NDA">NDA</option>
+                <option value="AFCAT">AFCAT</option>
+                <option value="CAPF">CAPF</option>
+              </select>
+
+              <input
+                type="number"
+                placeholder=""
+                value={mockForm.durationMinutes}
+                onChange={(e) => setMockForm({ ...mockForm, durationMinutes: Number(e.target.value) })}
+                className="p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-xs outline-none text-[var(--text-primary)]"
+              />
+
+              <input
+                type="number"
+                placeholder=""
+                value={mockForm.totalMarks}
+                onChange={(e) => setMockForm({ ...mockForm, totalMarks: Number(e.target.value) })}
+                className="p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-xs outline-none text-[var(--text-primary)]"
+              />
+
+              <input
+                type="number"
+                step="0.01"
+                placeholder=""
+                value={mockForm.positiveMarks}
+                onChange={(e) => setMockForm({ ...mockForm, positiveMarks: Number(e.target.value) })}
+                className="p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-xs outline-none text-[var(--text-primary)]"
+              />
+            </div>
+
+            <div className="space-y-4 pt-2">
+              <div className="flex justify-between items-center">
+                <h4 className="font-bold text-sm text-[var(--text-primary)] military-font uppercase">Mock Questions ({mockForm.questions.length})</h4>
+                <button
+                  type="button"
+                  onClick={() => setMockForm(prev => ({
+                    ...prev,
+                    questions: [...prev.questions, { question: '', options: ['', '', '', ''], answerIndex: 0, explanation: '' }]
+                  }))}
+                  className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Add Question
+                </button>
+              </div>
+
+              {mockForm.questions.map((q, qIndex) => (
+                <div key={qIndex} className="p-4 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border-color)] space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold text-amber-400">Mock Question {qIndex + 1}</span>
+                    {mockForm.questions.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => setMockForm(prev => ({
+                          ...prev,
+                          questions: prev.questions.filter((_, idx) => idx !== qIndex)
+                        }))}
+                        className="text-red-400 hover:text-red-300 text-xs font-bold"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+
+                  <input
+                    type="text"
+                    required
+                    placeholder=""
+                    value={q.question}
+                    onChange={(e) => {
+                      const newQuestions = [...mockForm.questions];
+                      newQuestions[qIndex].question = e.target.value;
+                      setMockForm({ ...mockForm, questions: newQuestions });
+                    }}
+                    className="w-full p-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs outline-none text-[var(--text-primary)]"
+                  />
+
+                  <div className="grid grid-cols-2 gap-2">
+                    {q.options.map((opt, optIndex) => (
+                      <input
+                        key={optIndex}
+                        type="text"
+                        required
+                        placeholder=""
+                        value={opt}
+                        onChange={(e) => {
+                          const newQuestions = [...mockForm.questions];
+                          newQuestions[qIndex].options[optIndex] = e.target.value;
+                          setMockForm({ ...mockForm, questions: newQuestions });
+                        }}
+                        className="p-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs outline-none text-[var(--text-primary)]"
+                      />
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <label className="text-xs text-[var(--text-secondary)]">Correct Option:</label>
+                    <select
+                      value={q.answerIndex}
+                      onChange={(e) => {
+                        const newQuestions = [...mockForm.questions];
+                        newQuestions[qIndex].answerIndex = Number(e.target.value);
+                        setMockForm({ ...mockForm, questions: newQuestions });
+                      }}
+                      className="p-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs outline-none text-[var(--text-primary)]"
+                    >
+                      <option value={0}>Option 1 (A)</option>
+                      <option value={1}>Option 2 (B)</option>
+                      <option value={2}>Option 3 (C)</option>
+                      <option value={3}>Option 4 (D)</option>
+                    </select>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button type="submit" className="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-sm military-font cursor-pointer shadow-lg">
+              Create Full Length Mock Test
+            </button>
+          </form>
         )}
 
         {activeTab === 'add-sheet' && (

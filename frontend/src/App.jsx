@@ -2,12 +2,10 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { GuestGuardProvider } from './context/GuestGuardContext';
 
 import Navbar from './components/common/Navbar';
 import Sidebar from './components/common/Sidebar';
 import Footer from './components/common/Footer';
-import GuestGuardModal from './components/common/GuestGuardModal';
 import SearchModal from './components/common/SearchModal';
 
 import Home from './pages/Home';
@@ -15,6 +13,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
 import Sheets from './pages/Sheets';
 import SheetDetail from './pages/SheetDetail';
 import Notifications from './pages/Notifications';
@@ -24,18 +23,30 @@ import Quizzes from './pages/Quizzes';
 import MockTests from './pages/MockTests';
 import AdminDashboard from './pages/AdminDashboard';
 
-
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  if (loading) return <div className="py-16 text-center">Verifying Identity...</div>;
+  if (loading) {
+    return (
+      <div className="py-20 text-center flex flex-col items-center justify-center space-y-3 text-[var(--text-secondary)]">
+        <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs font-bold military-font uppercase">Verifying Identity...</p>
+      </div>
+    );
+  }
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   return children;
 };
 
-
 const AdminRoute = ({ children }) => {
   const { isAdmin, loading } = useAuth();
-  if (loading) return <div className="py-16 text-center">Verifying Admin Privileges...</div>;
+  if (loading) {
+    return (
+      <div className="py-20 text-center flex flex-col items-center justify-center space-y-3 text-[var(--text-secondary)]">
+        <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs font-bold military-font uppercase">Verifying Admin Privileges...</p>
+      </div>
+    );
+  }
   if (!isAdmin) return <Navigate to="/" replace />;
   return children;
 };
@@ -64,7 +75,6 @@ const AppContent = () => {
     <div className="min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300">
       <Navbar onOpenSearch={() => setSearchOpen(true)} />
       <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
-      <GuestGuardModal />
 
       <div className="flex-1 flex w-full max-w-[98%] xl:max-w-[1440px] mx-auto px-3 sm:px-5 py-6 gap-6 lg:gap-8">
         <Sidebar />
@@ -72,6 +82,7 @@ const AppContent = () => {
           <Routes>
             <Route path="/" element={<Home onOpenSearch={() => setSearchOpen(true)} />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/sheets" element={<Sheets />} />
             <Route path="/sheets/:slug" element={<SheetDetail />} />
             <Route path="/notifications" element={<Notifications />} />
@@ -95,9 +106,7 @@ const App = () => {
     <Router>
       <ThemeProvider>
         <AuthProvider>
-          <GuestGuardProvider>
-            <AppContent />
-          </GuestGuardProvider>
+          <AppContent />
         </AuthProvider>
       </ThemeProvider>
     </Router>
