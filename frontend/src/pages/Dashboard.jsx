@@ -20,12 +20,12 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      await refreshProfile();
+      refreshProfile().catch(() => {});
       const [bmRes, notesRes, quizRes, mockRes] = await Promise.all([
-        API.get('/sheets/user/bookmarks'),
-        API.get('/sheets/user/notes'),
-        API.get('/quizzes/user/history'),
-        API.get('/mocktests/user/history')
+        API.get('/sheets/user/bookmarks').catch(() => ({ data: [] })),
+        API.get('/sheets/user/notes').catch(() => ({ data: [] })),
+        API.get('/quizzes/user/history').catch(() => ({ data: [] })),
+        API.get('/mocktests/user/history').catch(() => ({ data: [] }))
       ]);
 
       const bmData = bmRes.data?.data || bmRes.data;

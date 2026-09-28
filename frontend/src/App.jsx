@@ -25,7 +25,7 @@ import AdminDashboard from './pages/AdminDashboard';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  if (loading) {
+  if (loading && !isAuthenticated) {
     return (
       <div className="py-20 text-center flex flex-col items-center justify-center space-y-3 text-[var(--text-secondary)]">
         <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
@@ -38,8 +38,8 @@ const ProtectedRoute = ({ children }) => {
 };
 
 const AdminRoute = ({ children }) => {
-  const { isAdmin, loading } = useAuth();
-  if (loading) {
+  const { isAdmin, isAuthenticated, loading } = useAuth();
+  if (loading && !isAuthenticated) {
     return (
       <div className="py-20 text-center flex flex-col items-center justify-center space-y-3 text-[var(--text-secondary)]">
         <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />

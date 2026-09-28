@@ -18,25 +18,29 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
-  const fetchProfile = async () => {
+  const fetchProfile = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent && !user) {
+        setLoading(true);
+      }
       const res = await API.get('/auth/me', { timeout: 6000 });
       const payload = res.data?.data || res.data;
       if (payload && payload.user) {
         setUser(payload.user);
         setStats(payload.stats || null);
-      } else {
-        setUser(payload || null);
+      } else if (payload) {
+        setUser(payload);
       }
     } catch (err) {
       console.error('Auth verify error:', err);
-      localStorage.removeItem('rozer_access_token');
-      localStorage.removeItem('rozer_token');
-      localStorage.removeItem('rozer_refresh_token');
-      setToken(null);
-      setUser(null);
-      setStats(null);
+      if (err.response?.status === 401 || err.response?.status === 403 || !user) {
+        localStorage.removeItem('rozer_access_token');
+        localStorage.removeItem('rozer_token');
+        localStorage.removeItem('rozer_refresh_token');
+        setToken(null);
+        setUser(null);
+        setStats(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -113,7 +117,7 @@ export const AuthProvider = ({ children }) => {
         register,
         logout,
         updateUserProfile,
-        refreshProfile: fetchProfile
+        refreshProfile: () => fetchProfile(true)
       }}
     >
       {children}
