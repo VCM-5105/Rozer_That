@@ -31,14 +31,12 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Auth verify error:', err);
-      if (err.response?.status === 401 || err.response?.status === 403) {
-        localStorage.removeItem('rozer_access_token');
-        localStorage.removeItem('rozer_token');
-        localStorage.removeItem('rozer_refresh_token');
-        setToken(null);
-        setUser(null);
-        setStats(null);
-      }
+      localStorage.removeItem('rozer_access_token');
+      localStorage.removeItem('rozer_token');
+      localStorage.removeItem('rozer_refresh_token');
+      setToken(null);
+      setUser(null);
+      setStats(null);
     } finally {
       setLoading(false);
     }

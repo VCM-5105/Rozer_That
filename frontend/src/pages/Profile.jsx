@@ -150,64 +150,6 @@ const Profile = () => {
         </div>
       </div>
 
-      <div className="p-6 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-xl space-y-6">
-        <h3 className="font-bold text-lg text-[var(--text-primary)] military-font uppercase flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-amber-500" /> Avatar Image Settings
-        </h3>
-
-        <div className="space-y-4">
-          <div className="p-5 rounded-2xl bg-[var(--bg-primary)] border-2 border-dashed border-amber-500/40 space-y-3">
-            <label className="block text-xs font-bold text-[var(--text-primary)] uppercase flex items-center gap-2">
-              <FileUp className="w-4 h-4 text-amber-500" /> Upload Custom Avatar Image
-            </label>
-            <div className="flex items-center gap-3">
-              <label htmlFor="avatar-file-button" className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center gap-2 cursor-pointer shadow-md military-font uppercase">
-                <Upload className="w-4 h-4" /> Choose Avatar Image
-              </label>
-              <input
-                id="avatar-file-button"
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarFileChange}
-                className="hidden"
-              />
-              <span className="text-xs text-[var(--text-secondary)] font-mono">
-                {uploading ? 'Uploading avatar...' : 'Select image from device'}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between p-4 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border-color)]">
-            <div className="space-y-0.5">
-              <p className="text-xs font-bold text-[var(--text-primary)] military-font uppercase">Default Avatar Placeholder</p>
-              <p className="text-[11px] text-[var(--text-secondary)]">Use simple initial badge as profile avatar</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                updateUserProfile({ avatar: '' });
-                setMsg('Reset to default initial avatar placeholder!');
-              }}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold military-font uppercase cursor-pointer border border-slate-700"
-            >
-              Use Default Avatar
-            </button>
-          </div>
-
-          <form onSubmit={handleApplyCustomUrl} className="flex gap-3">
-            <input
-              type="text"
-              placeholder=""
-              value={customAvatarUrl}
-              onChange={(e) => setCustomAvatarUrl(e.target.value)}
-              className="flex-1 p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-xs outline-none text-[var(--text-primary)]"
-            />
-            <button type="submit" className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs military-font uppercase cursor-pointer">
-              Set Image URL
-            </button>
-          </form>
-        </div>
-      </div>
     </div>
   );
 };
