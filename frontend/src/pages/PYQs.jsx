@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Download, FileText, Calendar, Filter, Search, Plus, Upload, FileUp, CheckCircle2, X } from 'lucide-react';
+import { Download, FileText, Calendar, Filter, Search, Plus, Upload, FileUp, CheckCircle2, X, Eye } from 'lucide-react';
 import API from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import PdfViewerModal from '../components/common/PdfViewerModal';
 
 const PYQs = () => {
   const { isAdmin } = useAuth();
@@ -9,6 +10,7 @@ const PYQs = () => {
   const [examFilter, setExamFilter] = useState('All');
   const [yearFilter, setYearFilter] = useState('');
   const [loading, setLoading] = useState(true);
+  const [selectedPdf, setSelectedPdf] = useState(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newPyq, setNewPyq] = useState({ title: '', exam: 'NDA', year: '2026', paper_type: 'Mathematics', file_url: '', fileName: '' });
@@ -155,15 +157,23 @@ const PYQs = () => {
                 <p className="text-xs text-[var(--text-secondary)] mt-1">Official question paper download archive</p>
               </div>
 
-              <div className="pt-4 border-t border-[var(--border-color)] flex justify-between items-center">
+              <div className="pt-4 border-t border-[var(--border-color)] flex flex-wrap justify-between items-center gap-2">
                 <span className="text-[10px] text-[var(--text-secondary)]">Downloaded: <strong className="text-teal-500">{paper.download_count || 0}x</strong></span>
                 
-                <button
-                  onClick={() => handleDownload(paper.id, paper.file_url, paper.title)}
-                  className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-md transition flex items-center gap-1.5 cursor-pointer military-font tracking-wider"
-                >
-                  <Download className="w-3.5 h-3.5" /> Download Paper
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setSelectedPdf(paper)}
+                    className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-md transition flex items-center gap-1 cursor-pointer military-font tracking-wider"
+                  >
+                    <Eye className="w-3.5 h-3.5" /> View PDF
+                  </button>
+                  <button
+                    onClick={() => handleDownload(paper.id, paper.file_url, paper.title)}
+                    className="px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-md transition flex items-center gap-1 cursor-pointer military-font tracking-wider"
+                  >
+                    <Download className="w-3.5 h-3.5" /> Download
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -262,6 +272,18 @@ const PYQs = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {selectedPdf && (
+        <PdfViewerModal
+          isOpen={!!selectedPdf}
+          onClose={() => setSelectedPdf(null)}
+          pdfUrl={selectedPdf.file_url}
+          title={selectedPdf.title}
+          exam={selectedPdf.exam}
+          year={selectedPdf.year}
+          paperType={selectedPdf.paper_type}
+        />
       )}
     </div>
   );

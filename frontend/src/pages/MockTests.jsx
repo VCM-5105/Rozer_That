@@ -1,69 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Clock, Award, Play, FileText, CheckCircle2 } from 'lucide-react';
+import { Shield, Clock, Award, Play, FileText, CheckCircle2, Eye } from 'lucide-react';
 import API from '../services/api';
 import MockTestArena from '../components/mock/MockTestArena';
-
-const SAMPLE_CDS_MOCK = {
-  id: 'cds-full-mock-1',
-  title: 'UPSC CDS II 2026 Full General Knowledge & English Test',
-  exam: 'CDS',
-  durationMinutes: 120,
-  totalMarks: 100,
-  positiveMarks: 0.83,
-  negativeMarks: 0.27,
-  questions: [
-    {
-      id: 'q1',
-      section: 'General Knowledge',
-      question: 'Which of the following passes connects Srinagar with Leh in Jammu and Kashmir?',
-      options: ['Bara Lacha La', 'Zoji La', 'Rohtang Pass', 'Nathu La'],
-      answerIndex: 1,
-      explanation: 'Zoji La pass connects Srinagar with Leh.'
-    },
-    {
-      id: 'q2',
-      section: 'Defence & Military History',
-      question: 'What is the motto of the Indian Armed Forces?',
-      options: ['Service Before Self', 'Touch the Sky with Glory', 'Sham No Varunah', 'Valour and Faith'],
-      answerIndex: 0,
-      explanation: 'Service Before Self is the motto of the Indian Armed Forces.'
-    },
-    {
-      id: 'q3',
-      section: 'English',
-      question: 'Choose the correct synonym for "TENACIOUS":',
-      options: ['Weak', 'Persistent', 'Hesitant', 'Timid'],
-      answerIndex: 1,
-      explanation: 'Tenacious means persistent or determined.'
-    }
-  ]
-};
-
-const SAMPLE_NDA_MOCK = {
-  id: 'nda-maths-mock-1',
-  title: 'UPSC NDA I 2026 Mathematics Full Test',
-  exam: 'NDA',
-  durationMinutes: 150,
-  totalMarks: 300,
-  positiveMarks: 2.5,
-  negativeMarks: 0.83,
-  questions: [
-    {
-      id: 'nq1',
-      section: 'Mathematics',
-      question: 'What is the value of log10(1000)?',
-      options: ['1', '2', '3', '4'],
-      answerIndex: 2,
-      explanation: 'log10(1000) = log10(10^3) = 3.'
-    }
-  ]
-};
+import PdfViewerModal from '../components/common/PdfViewerModal';
 
 const MockTests = () => {
   const [examFilter, setExamFilter] = useState('All');
   const [mocks, setMocks] = useState([]);
   const [pyqs, setPyqs] = useState([]);
   const [activeMock, setActiveMock] = useState(null);
+  const [selectedPdf, setSelectedPdf] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -97,11 +43,7 @@ const MockTests = () => {
     return <MockTestArena mockId={activeMock.id} mockData={activeMock} onBack={() => setActiveMock(null)} />;
   }
 
-  const allMocksCombined = [
-    SAMPLE_CDS_MOCK,
-    SAMPLE_NDA_MOCK,
-    ...mocks
-  ].filter((m) => examFilter === 'All' || m.exam === examFilter);
+  const allMocksCombined = mocks.filter((m) => examFilter === 'All' || m.exam === examFilter);
 
   const filteredPyqs = pyqs.filter((p) => examFilter === 'All' || p.exam === examFilter);
 
@@ -209,28 +151,10 @@ const MockTests = () => {
                     </div>
 
                     <button
-                      onClick={() => setActiveMock({
-                        id: pyq.id,
-                        title: pyq.title,
-                        exam: pyq.exam,
-                        durationMinutes: 120,
-                        totalMarks: 100,
-                        positiveMarks: 1,
-                        negativeMarks: 0.33,
-                        questions: [
-                          {
-                            id: 'pyq-q1',
-                            section: pyq.paper_type || 'General',
-                            question: `Official Question Paper: ${pyq.title} (${pyq.exam} ${pyq.year})`,
-                            options: ['Option A', 'Option B', 'Option C', 'Option D'],
-                            answerIndex: 0,
-                            explanation: 'Official Previous Year Question Paper.'
-                          }
-                        ]
-                      })}
-                      className="w-full py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition cursor-pointer military-font uppercase"
+                      onClick={() => setSelectedPdf(pyq)}
+                      className="w-full py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition cursor-pointer military-font uppercase tracking-wider"
                     >
-                      <Play className="w-3.5 h-3.5 fill-white" /> Open in Mock Arena
+                      <Eye className="w-3.5 h-3.5" /> View PDF Paper
                     </button>
                   </div>
                 ))}
@@ -238,6 +162,18 @@ const MockTests = () => {
             </div>
           )}
         </div>
+      )}
+
+      {selectedPdf && (
+        <PdfViewerModal
+          isOpen={!!selectedPdf}
+          onClose={() => setSelectedPdf(null)}
+          pdfUrl={selectedPdf.file_url}
+          title={selectedPdf.title}
+          exam={selectedPdf.exam}
+          year={selectedPdf.year}
+          paperType={selectedPdf.paper_type}
+        />
       )}
     </div>
   );

@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const res = await API.get('/auth/me');
+      const res = await API.get('/auth/me', { timeout: 6000 });
       const payload = res.data?.data || res.data;
       if (payload && payload.user) {
         setUser(payload.user);
@@ -31,12 +31,14 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Auth verify error:', err);
-      localStorage.removeItem('rozer_access_token');
-      localStorage.removeItem('rozer_token');
-      localStorage.removeItem('rozer_refresh_token');
-      setToken(null);
-      setUser(null);
-      setStats(null);
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        localStorage.removeItem('rozer_access_token');
+        localStorage.removeItem('rozer_token');
+        localStorage.removeItem('rozer_refresh_token');
+        setToken(null);
+        setUser(null);
+        setStats(null);
+      }
     } finally {
       setLoading(false);
     }
