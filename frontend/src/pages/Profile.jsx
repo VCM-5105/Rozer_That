@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Mail, Shield, Calendar, Award, BookOpen, CheckCircle2, Upload, FileUp, Sparkles, Flame, Bookmark, BarChart3, Edit3 } from 'lucide-react';
+import {Mail, Calendar, Award, BookOpen, CheckCircle2, Upload, FileUp, Sparkles, Flame, Bookmark, BarChart3, Edit3 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import API from '../services/api';
 
@@ -48,10 +48,7 @@ const Profile = () => {
     }
   };
 
-  const handleSelectPreset = (url) => {
-    updateUserProfile({ avatar: url });
-    setMsg('Avatar updated to selected preset!');
-  };
+
 
   const handleApplyCustomUrl = (e) => {
     e.preventDefault();
@@ -180,21 +177,21 @@ const Profile = () => {
             </div>
           </div>
 
-          <div className="space-y-3">
-            <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase">Or Choose Preset Avatar Icon</label>
-            <div className="flex items-center gap-3 overflow-x-auto pb-2">
-              {PRESET_AVATARS.map((url, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleSelectPreset(url)}
-                  className={`relative p-1 rounded-full border-2 transition cursor-pointer ${
-                    user.avatar === url ? 'border-amber-500 scale-105' : 'border-[var(--border-color)] hover:border-amber-500/50'
-                  }`}
-                >
-                  <img src={url} alt={`Preset ${index + 1}`} className="w-14 h-14 rounded-full object-cover" />
-                </button>
-              ))}
+          <div className="flex items-center justify-between p-4 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border-color)]">
+            <div className="space-y-0.5">
+              <p className="text-xs font-bold text-[var(--text-primary)] military-font uppercase">Default Avatar Placeholder</p>
+              <p className="text-[11px] text-[var(--text-secondary)]">Use simple initial badge as profile avatar</p>
             </div>
+            <button
+              type="button"
+              onClick={() => {
+                updateUserProfile({ avatar: '' });
+                setMsg('Reset to default initial avatar placeholder!');
+              }}
+              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold military-font uppercase cursor-pointer border border-slate-700"
+            >
+              Use Default Avatar
+            </button>
           </div>
 
           <form onSubmit={handleApplyCustomUrl} className="flex gap-3">
