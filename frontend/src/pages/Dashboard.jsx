@@ -48,21 +48,21 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-8">
-      {/* Welcome Banner */}
+     
       <div className="p-8 rounded-3xl bg-gradient-to-r from-teal-900 via-slate-900 to-slate-800 text-white shadow-xl border border-slate-700/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/20 text-teal-400 text-xs font-semibold uppercase">
-            Operations Command 🎖️
+            Operations Command
           </div>
           <h1 className="text-3xl font-extrabold">
             Welcome back, <span className="text-teal-400">{user?.username}</span>!
           </h1>
           <p className="text-xs text-slate-300">
-            Keep your preparation momentum strong. Target defense exams: NDA • CDS • AFCAT
+            Keep your preparation momentum strong
           </p>
         </div>
 
-        {/* Streak Counter */}
+        
         <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/30">
           <Flame className="w-8 h-8 text-amber-500 animate-bounce" />
           <div>
@@ -72,7 +72,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Analytics Overview Grid */}
+      
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="p-6 rounded-2xl glass-card space-y-3">
           <div className="flex justify-between items-center text-[var(--text-secondary)]">
